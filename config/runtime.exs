@@ -32,6 +32,20 @@ if config_env() == :prod do
 
   config :comparoya, Comparoya.Repo,
     ssl: true,
+    ssl_opts: [
+      verify: :verify_peer,
+      cacerts: [
+        System.get_env("DATABASE_CA_CERT")
+        |> then(fn pem ->
+          [{_type, der, _info}] = :public_key.pem_decode(pem)
+          der
+        end)
+      ],
+      server_name_indication: System.get_env("DATABASE_HOSTNAME") |> to_charlist(),
+      customize_hostname_check: [
+        match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+      ]
+    ],
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
