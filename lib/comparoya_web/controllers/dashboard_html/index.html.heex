@@ -1,0 +1,40 @@
+<div class="bg-white shadow rounded-lg p-6">
+  <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Your Profile</h2>
+    <div class="flex items-start space-x-4">
+      <%= if @current_user.avatar do %>
+        <img src={@current_user.avatar} class="h-16 w-16 rounded-full" alt="User avatar" />
+      <% else %>
+        <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+          <span class="text-gray-500 text-xl">
+            {String.first(@current_user.name || @current_user.email)}
+          </span>
+        </div>
+      <% end %>
+
+      <div>
+        <p class="font-medium">{@current_user.name || "No name provided"}</p>
+        <p class="text-gray-600">{@current_user.email}</p>
+        <p class="text-sm text-gray-500 mt-1">Signed in with {@current_user.provider}</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-xl font-semibold mb-2">Account Information</h2>
+    <div class="bg-gray-50 p-4 rounded">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-500">Provider ID</p>
+          <p class="font-mono text-sm">{@current_user.provider_id}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Joined</p>
+          <p>{@current_user.inserted_at |> Calendar.strftime("%B %d, %Y")}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

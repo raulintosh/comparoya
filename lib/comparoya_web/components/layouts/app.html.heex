@@ -9,18 +9,21 @@
       </p>
     </div>
     <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
+      <%= if @current_user do %>
+        <div class="flex items-center gap-2">
+          <%= if @current_user.avatar do %>
+            <img src={@current_user.avatar} class="h-8 w-8 rounded-full" alt="User avatar" />
+          <% end %>
+          <span>{@current_user.name || @current_user.email}</span>
+        </div>
+        <a href="/logout" class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
+          Logout
+        </a>
+      <% else %>
+        <a href="/auth/google" class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
+          Login with Google
+        </a>
+      <% end %>
     </div>
   </div>
 </header>

@@ -1,6 +1,8 @@
 defmodule ComparoyaWeb.Router do
   use ComparoyaWeb, :router
 
+  import ComparoyaWeb.Plugs.Auth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +10,7 @@ defmodule ComparoyaWeb.Router do
     plug :put_root_layout, html: {ComparoyaWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -18,6 +21,15 @@ defmodule ComparoyaWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/logout", AuthController, :logout
+    get "/dashboard", DashboardController, :index
+  end
+
+  scope "/auth", ComparoyaWeb do
+    pipe_through :browser
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
   # Other scopes may use custom stacks.
