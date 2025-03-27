@@ -5,6 +5,10 @@ defmodule ComparoyaWeb.AuthController do
   alias Comparoya.Accounts
   alias Comparoya.Accounts.User
 
+  def request(conn, _params) do
+    Phoenix.Controller.redirect(conn, to: Ueberauth.Strategy.Helpers.callback_url(conn))
+  end
+
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     case Accounts.find_or_create_user(auth) do
       {:ok, user} ->
