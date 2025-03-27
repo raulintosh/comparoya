@@ -63,7 +63,7 @@ config :phoenix, :json_library, Jason
 
 config :ueberauth, Ueberauth,
   providers: [
-    google: {Ueberauth.Strategy.Google, [default_scope: "email profile opened"]}
+    google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
   ]
 
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
