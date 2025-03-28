@@ -2,6 +2,8 @@ defmodule ComparoyaWeb.Router do
   use ComparoyaWeb, :router
 
   import ComparoyaWeb.Plugs.Auth
+  import ComparoyaWeb.Plugs.AdminAuth
+  import ComparoyaWeb.Plugs.AuthOrAdmin
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -11,6 +13,11 @@ defmodule ComparoyaWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+    plug :fetch_current_admin
+  end
+
+  pipeline :admin do
+    plug :require_admin
   end
 
   pipeline :api do
@@ -25,11 +32,34 @@ defmodule ComparoyaWeb.Router do
     get "/dashboard", DashboardController, :index
   end
 
+  scope "/", ComparoyaWeb do
+    pipe_through [:browser, :require_authenticated_user_or_admin]
+
+    resources "/job_configurations", JobConfigurationController
+    post "/job_configurations/:id/run_now", JobConfigurationController, :run_now
+  end
+
   scope "/auth", ComparoyaWeb do
     pipe_through :browser
 
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
+  end
+
+  scope "/admin", ComparoyaWeb do
+    pipe_through :browser
+
+    get "/login", AdminAuthController, :login_form
+    post "/login", AdminAuthController, :login
+    get "/register", AdminAuthController, :register_form
+    post "/register", AdminAuthController, :register
+    get "/logout", AdminAuthController, :logout
+  end
+
+  scope "/admin", ComparoyaWeb do
+    pipe_through [:browser, :admin]
+
+    # Add admin-only routes here
   end
 
   # Other scopes may use custom stacks.

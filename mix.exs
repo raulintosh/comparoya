@@ -59,7 +59,13 @@ defmodule Comparoya.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:ueberauth, "~> 0.10.8"},
-      {:ueberauth_google, "~> 0.12.1"}
+      {:ueberauth_google, "~> 0.12.1"},
+      {:quantum, "~> 3.5"},
+      {:httpoison, "~> 2.2"},
+      {:sweet_xml, "~> 0.7.4"},
+      {:oban, "~> 2.17"},
+      {:bcrypt_elixir, "~> 3.0"},
+      {:number, "~> 1.0"}
     ]
   end
 

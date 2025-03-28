@@ -1,0 +1,29 @@
+<div class="mx-auto max-w-sm">
+  <.header class="text-center">
+    Register Admin Account
+    <:subtitle>
+      Create a new admin account with username and password
+    </:subtitle>
+  </.header>
+
+  <.simple_form :let={f} for={@changeset} action={~p"/admin/register"} as={:user}>
+    <.error :if={@changeset.action}>
+      Oops, something went wrong! Please check the errors below.
+    </.error>
+
+    <.input field={f[:email]} type="email" label="Email" required />
+    <.input field={f[:name]} type="text" label="Name" />
+    <.input field={f[:username]} type="text" label="Username" required />
+    <.input field={f[:password]} type="password" label="Password" required />
+
+    <:actions>
+      <.button class="w-full">Register</.button>
+    </:actions>
+  </.simple_form>
+
+  <p class="text-center mt-4">
+    <.link navigate={~p"/admin/login"} class="text-sm font-semibold">
+      Already have an account? Log in
+    </.link>
+  </p>
+</div>

@@ -7,6 +7,9 @@ defmodule Comparoya.Application do
 
   @impl true
   def start(_type, _args) do
+    # Initialize the scheduler manager after the application starts
+    :timer.apply_after(5000, Comparoya.Jobs.SchedulerManager, :init, [])
+
     children = [
       ComparoyaWeb.Telemetry,
       Comparoya.Repo,
@@ -16,6 +19,10 @@ defmodule Comparoya.Application do
       {Finch, name: Comparoya.Finch},
       # Start a worker by calling: Comparoya.Worker.start_link(arg)
       # {Comparoya.Worker, arg},
+      # Start Oban for background jobs
+      {Oban, Application.fetch_env!(:comparoya, Oban)},
+      # Start Quantum for scheduled jobs
+      Comparoya.Scheduler,
       # Start to serve requests, typically the last entry
       ComparoyaWeb.Endpoint
     ]

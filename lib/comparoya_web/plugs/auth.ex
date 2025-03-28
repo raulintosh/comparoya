@@ -5,9 +5,6 @@ defmodule ComparoyaWeb.Plugs.Auth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias Comparoya.Accounts
-  alias Comparoya.Repo
-
   @doc """
   Fetches the current user from the session and assigns it to the connection.
   """

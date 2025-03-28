@@ -1,0 +1,34 @@
+<.header>
+  Job Configuration Details
+  <:subtitle>ID: {@job_configuration.id}</:subtitle>
+  <:actions>
+    <.link href={~p"/job_configurations/#{@job_configuration}/edit"}>
+      <.button>Edit job configuration</.button>
+    </.link>
+    <.link
+      href={~p"/job_configurations/#{@job_configuration}/run_now"}
+      method="post"
+      data-confirm="Are you sure you want to run this job now?"
+    >
+      <.button>Run Now</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name">{@job_configuration.name}</:item>
+  <:item title="Description">{@job_configuration.description}</:item>
+  <:item title="Job Type">{@job_configuration.job_type}</:item>
+  <:item title="Interval (minutes)">{@job_configuration.interval_minutes}</:item>
+  <:item title="Enabled">{if @job_configuration.enabled, do: "Yes", else: "No"}</:item>
+  <:item title="Last Run">
+    {if @job_configuration.last_run_at,
+      do: Calendar.strftime(@job_configuration.last_run_at, "%Y-%m-%d %H:%M:%S"),
+      else: "Never"}
+  </:item>
+  <:item title="Configuration">
+    <pre>{Jason.encode!(@job_configuration.config, pretty: true)}</pre>
+  </:item>
+</.list>
+
+<.back navigate={~p"/job_configurations"}>Back to job configurations</.back>

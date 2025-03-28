@@ -1,0 +1,19 @@
+<div class="mx-auto max-w-sm">
+  <.header class="text-center">
+    Admin Login
+    <:subtitle>
+      Enter your admin credentials to access the dashboard
+    </:subtitle>
+  </.header>
+
+  <.simple_form :let={f} for={%{}} action={~p"/admin/login"} as={:user}>
+    <.error :if={@error_message}>{@error_message}</.error>
+
+    <.input field={f[:username]} type="text" label="Username" required />
+    <.input field={f[:password]} type="password" label="Password" required />
+
+    <:actions>
+      <.button class="w-full">Log in</.button>
+    </:actions>
+  </.simple_form>
+</div>

@@ -63,12 +63,27 @@ config :phoenix, :json_library, Jason
 
 config :ueberauth, Ueberauth,
   providers: [
-    google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
+    google:
+      {Ueberauth.Strategy.Google,
+       [default_scope: "email profile https://www.googleapis.com/auth/gmail.readonly"]}
   ]
 
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: {System, :get_env, ["GOOGLE_CLIENT_ID"]},
   client_secret: {System, :get_env, ["GOOGLE_CLIENT_SECRET"]}
+
+# Configure Oban for background jobs
+config :comparoya, Oban,
+  repo: Comparoya.Repo,
+  plugins: [
+    # 1 week
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Cron, crontab: []}
+  ],
+  queues: [gmail: 10, default: 10]
+
+# Configure Quantum for scheduled jobs
+config :comparoya, Comparoya.Scheduler, jobs: []
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
