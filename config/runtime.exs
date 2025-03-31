@@ -128,4 +128,33 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+    client_id: System.get_env("GOOGLE_CLIENT_ID") || "your_client_id",
+    client_secret: System.get_env("GOOGLE_CLIENT_SECRET") || "your_client_secret"
+
+  # Configure ExAws for DigitalOcean Spaces
+  config :ex_aws,
+    access_key_id: System.get_env("DO_SPACES_KEY") || "your_key_here",
+    secret_access_key: System.get_env("DO_SPACES_SECRET") || "your_secret_key_here",
+    region: "sfo3",
+    s3: [
+      scheme: "https://",
+      host: "comparoya.sfo3.digitaloceanspaces.com",
+      region: "sfo3",
+      normalize_path: true,
+      virtual_host: false
+    ]
+
+  # Configure Oban for job processing
+  config :comparoya, Oban,
+    repo: Comparoya.Repo,
+    plugins: [
+      # 1 week
+      {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+      {Oban.Plugins.Cron,
+       crontab: [
+         {"0 */3 * * *", Comparoya.Workers.GmailXmlAttachmentWorker}
+       ]}
+    ],
+    queues: [default: 10, gmail: 5]
 end
