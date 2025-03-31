@@ -51,6 +51,7 @@ defmodule Comparoya.Jobs.JobConfiguration do
     __MODULE__
     |> where([j], j.enabled == true)
     |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   @doc """
@@ -60,6 +61,7 @@ defmodule Comparoya.Jobs.JobConfiguration do
     __MODULE__
     |> where([j], j.enabled == true and j.job_type == ^job_type)
     |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   @doc """
@@ -69,6 +71,7 @@ defmodule Comparoya.Jobs.JobConfiguration do
     __MODULE__
     |> where([j], j.enabled == true and j.user_id == ^user_id)
     |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   @doc """

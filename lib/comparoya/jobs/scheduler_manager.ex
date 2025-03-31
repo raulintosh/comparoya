@@ -53,7 +53,15 @@ defmodule Comparoya.Jobs.SchedulerManager do
   """
   def unschedule_job(job_name) do
     Logger.info("Unscheduling job: #{job_name}")
-    Scheduler.delete_job(job_name)
+    # Convert string job name to atom for Quantum
+    job_name_atom =
+      if is_atom(job_name) do
+        job_name
+      else
+        String.to_atom(job_name)
+      end
+
+    Scheduler.delete_job(job_name_atom)
     :ok
   end
 
@@ -89,8 +97,17 @@ defmodule Comparoya.Jobs.SchedulerManager do
       overlap: false
     }
 
-    # Add the job to the scheduler
-    Scheduler.add_job(job)
+    # Add the job to the scheduler using the proper Quantum API
+    job_name_atom = String.to_atom(job_name)
+
+    # Schedule the job using the proper Quantum API
+    Scheduler.new_job()
+    |> Quantum.Job.set_name(job_name_atom)
+    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!(job.schedule))
+    |> Quantum.Job.set_task(job.task)
+    |> Quantum.Job.set_overlap(job.overlap)
+    |> Quantum.Job.set_timezone(:utc)
+    |> Scheduler.add_job()
 
     {:ok, job_name}
   end

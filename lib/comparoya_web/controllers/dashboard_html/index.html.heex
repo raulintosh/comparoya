@@ -110,16 +110,18 @@
     </div>
   </div>
 
-  <div>
-    <h2 class="text-xl font-semibold mb-2">Job Configurations</h2>
-    <div class="bg-gray-50 p-4 rounded">
-      <p class="mb-4">Manage your Gmail XML attachment processing jobs.</p>
-      <a
-        href={~p"/job_configurations"}
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        Manage Job Configurations
-      </a>
+  <%= if assigns[:current_admin] do %>
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Job Configurations</h2>
+      <div class="bg-gray-50 p-4 rounded">
+        <p class="mb-4">Manage Gmail XML attachment processing jobs.</p>
+        <a
+          href={~p"/admin/job_configurations"}
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Manage Job Configurations
+        </a>
+      </div>
     </div>
-  </div>
+  <% end %>
 </div>

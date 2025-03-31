@@ -17,14 +17,18 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
       Logger.info("Processing Gmail XML attachments for user #{user.email}")
 
       # Get options from job configuration
-      query = get_in(job_config.config, ["query"]) || "has:attachment filename:xml"
-      max_results = get_in(job_config.config, ["max_results"]) || 10
+      query =
+        get_in(job_config.config, ["query"]) ||
+          "has:attachment filename:xml {factura OR Factura OR FACTURA}"
 
+      max_results = get_in(job_config.config, ["max_results"]) || 10
+      IO.inspect(query, label: "Query")
+      IO.inspect(max_results, label: "Max Results")
       # Process the attachments
       case XmlAttachmentProcessor.process_xml_attachments(user,
              query: query,
              max_results: max_results,
-             callback: &handle_xml_data/3
+             callback: &handle_xml_data/4
            ) do
         {:ok, results} ->
           # Update the last run timestamp
@@ -54,7 +58,13 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
     with {:ok, user} <- get_user(user_id) do
       Logger.info("Processing Gmail XML attachments for user #{user.email} (direct call)")
 
-      case XmlAttachmentProcessor.process_xml_attachments(user, callback: &handle_xml_data/3) do
+      # Use the same case-insensitive query as the job configuration
+      query = "has:attachment filename:xml {factura OR Factura OR FACTURA}"
+
+      case XmlAttachmentProcessor.process_xml_attachments(user,
+             query: query,
+             callback: &handle_xml_data/4
+           ) do
         {:ok, results} ->
           processed_count = Enum.count(results, & &1.processed)
           error_count = Enum.count(results, & &1.error)
@@ -92,16 +102,17 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
     end
   end
 
-  defp handle_xml_data(parsed_xml, filename, message_id) do
+  defp handle_xml_data(parsed_xml, filename, message_id, storage_key) do
     # Use the InvoiceProcessor to save the invoice data
     alias Comparoya.Gmail.InvoiceProcessor
 
     Logger.info("Processing invoice data from file #{filename} in message #{message_id}")
+    Logger.info("File stored at: #{storage_key}")
 
     case parsed_xml do
       %{invoice: _, business_entity: _, items: _, metadata: _} = invoice_data ->
         # This is an invoice XML, process it
-        case InvoiceProcessor.save_invoice(invoice_data, nil) do
+        case InvoiceProcessor.save_invoice(invoice_data, nil, storage_key) do
           {:ok, result} ->
             Logger.info("Successfully processed invoice #{result.invoice.invoice_number}")
             :ok
@@ -113,7 +124,7 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
 
       _ ->
         # This is not an invoice XML, log and continue
-        Logger.warn("XML file #{filename} is not a recognized invoice format")
+        Logger.warning("XML file #{filename} is not a recognized invoice format")
         :ok
     end
   end

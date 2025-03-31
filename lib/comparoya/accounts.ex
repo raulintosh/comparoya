@@ -9,6 +9,13 @@ defmodule Comparoya.Accounts do
   alias Bcrypt
 
   @doc """
+  Returns the list of users.
+  """
+  def list_users do
+    Repo.all(User)
+  end
+
+  @doc """
   Gets a single user by email.
   Returns nil if the user does not exist.
   """

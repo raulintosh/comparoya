@@ -7,6 +7,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   import SweetXml
   alias Comparoya.Gmail.API
   alias Comparoya.Accounts.User
+  alias ExAws.S3
 
   @doc """
   Processes XML attachments for a user.
@@ -15,7 +16,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
 
   * `user` - The user to process attachments for
   * `opts` - Options for processing
-    * `:query` - Gmail search query (default: "has:attachment filename:xml")
+    * `:query` - Gmail search query (default: "has:attachment filename:xml factura")
     * `:max_results` - Maximum number of messages to process (default: 10)
     * `:callback` - Function to call with the parsed XML (default: nil)
 
@@ -25,7 +26,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   * `{:error, reason}` - If an error occurs
   """
   def process_xml_attachments(%User{} = user, opts \\ []) do
-    query = Keyword.get(opts, :query, "has:attachment filename:xml")
+    query = Keyword.get(opts, :query, "has:attachment filename:xml factura")
     max_results = Keyword.get(opts, :max_results, 10)
     callback = Keyword.get(opts, :callback)
 
@@ -124,20 +125,49 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
 
   # Helper functions to get Google OAuth credentials
   defp get_google_client_id do
-    {_, _, [env_var]} =
-      Application.fetch_env!(:ueberauth, Ueberauth.Strategy.Google.OAuth)[:client_id]
-
-    System.get_env(env_var)
+    Application.fetch_env!(:ueberauth, Ueberauth.Strategy.Google.OAuth)[:client_id]
   end
 
   defp get_google_client_secret do
-    {_, _, [env_var]} =
-      Application.fetch_env!(:ueberauth, Ueberauth.Strategy.Google.OAuth)[:client_secret]
-
-    System.get_env(env_var)
+    Application.fetch_env!(:ueberauth, Ueberauth.Strategy.Google.OAuth)[:client_secret]
   end
 
-  # These functions are no longer needed since we're using the refresh token directly from the user record
+  # Helper function to add padding to Base64 data if needed
+  defp pad_base64(data) do
+    case rem(String.length(data), 4) do
+      0 -> data
+      1 -> data <> "==="
+      2 -> data <> "=="
+      3 -> data <> "="
+    end
+  end
+
+  # Upload file to DigitalOcean Spaces
+  defp upload_to_spaces(data, filename) do
+    # Generate a unique key for the file in the "facturas" folder
+    key = "facturas/#{DateTime.utc_now() |> DateTime.to_iso8601()}_#{filename}"
+
+    # Upload the file to DigitalOcean Spaces
+    try do
+      result =
+        S3.put_object("comparoya", key, data)
+        |> ExAws.request()
+
+      case result do
+        {:ok, _response} ->
+          Logger.info("Successfully uploaded #{filename} to DigitalOcean Spaces")
+          {:ok, key}
+
+        {:error, error} ->
+          Logger.error("Failed to upload #{filename} to DigitalOcean Spaces: #{inspect(error)}")
+          {:error, "Failed to upload to DigitalOcean Spaces: #{inspect(error)}"}
+      end
+    rescue
+      e ->
+        Logger.error("Error uploading to DigitalOcean Spaces: #{inspect(e)}")
+        {:error, "Error uploading to DigitalOcean Spaces: #{inspect(e)}"}
+    end
+  end
 
   defp process_messages(%{"messages" => messages}, access_token, callback) do
     Enum.flat_map(messages, fn %{"id" => message_id} ->
@@ -172,24 +202,70 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
       filename: filename,
       processed: false,
       error: nil,
-      data: nil
+      data: nil,
+      storage_key: nil
     }
 
     if attachment_id do
       case API.get_attachment(access_token, message_id, attachment_id) do
         {:ok, %{"data" => data}} ->
-          decoded_data = Base.decode64!(data)
-
           try do
-            parsed_xml = parse_xml(decoded_data)
+            # Add debug logging to see what's happening
+            Logger.debug(
+              "Attempting to decode Base64 data: #{inspect(String.slice(data, 0, 100))}..."
+            )
 
-            if callback, do: callback.(parsed_xml, filename, message_id)
+            # Try different Base64 decoding approaches
+            decoded_data =
+              case Base.decode64(data, ignore: :whitespace) do
+                {:ok, decoded} ->
+                  decoded
 
-            %{result | processed: true, data: parsed_xml}
+                :error ->
+                  # Try with padding
+                  padded_data = pad_base64(data)
+
+                  case Base.decode64(padded_data, ignore: :whitespace) do
+                    {:ok, decoded} ->
+                      decoded
+
+                    :error ->
+                      # Try with URL-safe alphabet
+                      case Base.url_decode64(data, padding: false) do
+                        {:ok, decoded} ->
+                          decoded
+
+                        :error ->
+                          Logger.error("Error decoding Base64 data after multiple attempts")
+                          nil
+                      end
+                  end
+              end
+
+            if decoded_data do
+              # Upload the attachment to DigitalOcean Spaces
+              upload_result = upload_to_spaces(decoded_data, filename)
+
+              case upload_result do
+                {:ok, storage_key} ->
+                  # Parse the XML data
+                  parsed_xml = parse_xml(decoded_data)
+
+                  if callback, do: callback.(parsed_xml, filename, message_id, storage_key)
+
+                  %{result | processed: true, data: parsed_xml, storage_key: storage_key}
+
+                {:error, upload_error} ->
+                  Logger.error("Error uploading attachment: #{upload_error}")
+                  %{result | error: "Error uploading attachment: #{upload_error}"}
+              end
+            else
+              %{result | error: "Error decoding Base64 data"}
+            end
           rescue
             e ->
-              Logger.error("Error parsing XML attachment: #{inspect(e)}")
-              %{result | error: "Error parsing XML: #{inspect(e)}"}
+              Logger.error("Error processing XML attachment: #{inspect(e)}")
+              %{result | error: "Error processing XML: #{inspect(e)}"}
           end
 
         {:error, reason} ->
@@ -202,33 +278,64 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   end
 
   defp parse_xml(xml_data) do
-    # Parse the XML invoice data
-    parsed_xml = xml_data |> parse()
+    try do
+      # Parse the XML invoice data with better error handling
+      parsed_xml =
+        try do
+          xml_data |> parse()
+        rescue
+          e in ArgumentError ->
+            # Handle specific error for non-alphabet characters
+            if String.contains?(Exception.message(e), "non-alphabet character") do
+              # Try to clean the XML data by removing problematic characters
+              cleaned_xml = clean_xml_data(xml_data)
+              cleaned_xml |> parse()
+            else
+              reraise e, __STACKTRACE__
+            end
+        end
 
-    # Extract invoice data
-    invoice_data = extract_invoice_data(parsed_xml)
+      # Extract invoice data
+      invoice_data = extract_invoice_data(parsed_xml)
 
-    # Extract business entity data
-    business_entity = extract_business_entity(parsed_xml)
+      # Extract business entity data
+      business_entity = extract_business_entity(parsed_xml)
 
-    # Extract invoice items
-    items = extract_invoice_items(parsed_xml)
+      # Extract invoice items
+      items = extract_invoice_items(parsed_xml)
 
-    # Extract invoice metadata
-    metadata = extract_invoice_metadata(parsed_xml)
+      # Extract invoice metadata
+      metadata = extract_invoice_metadata(parsed_xml)
 
-    # Find user by email
-    user_id = find_user_id_by_email(parsed_xml)
+      # Find user by email
+      user_id = find_user_id_by_email(parsed_xml)
 
-    # Return structured data
-    %{
-      invoice: invoice_data,
-      business_entity: business_entity,
-      items: items,
-      metadata: metadata,
-      user_id: user_id,
-      raw_xml: xml_data
-    }
+      # Return structured data
+      %{
+        invoice: invoice_data,
+        business_entity: business_entity,
+        items: items,
+        metadata: metadata,
+        user_id: user_id,
+        raw_xml: xml_data
+      }
+    rescue
+      e ->
+        Logger.error("Error parsing XML: #{inspect(e)}")
+        reraise e, __STACKTRACE__
+    end
+  end
+
+  # Helper function to clean XML data by removing problematic characters
+  defp clean_xml_data(xml_data) do
+    # Replace problematic characters with their XML entity equivalents
+    xml_data
+    |> String.replace("-", "&#45;")
+    |> String.replace("&", "&amp;")
+    |> String.replace("<", "&lt;")
+    |> String.replace(">", "&gt;")
+    |> String.replace("\"", "&quot;")
+    |> String.replace("'", "&apos;")
   end
 
   # Extract invoice data from XML

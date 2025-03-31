@@ -2,11 +2,11 @@
   Job Configuration Details
   <:subtitle>ID: {@job_configuration.id}</:subtitle>
   <:actions>
-    <.link href={~p"/job_configurations/#{@job_configuration}/edit"}>
+    <.link href={~p"/admin/job_configurations/#{@job_configuration}/edit"}>
       <.button>Edit job configuration</.button>
     </.link>
     <.link
-      href={~p"/job_configurations/#{@job_configuration}/run_now"}
+      href={~p"/admin/job_configurations/#{@job_configuration}/run_now"}
       method="post"
       data-confirm="Are you sure you want to run this job now?"
     >
@@ -26,9 +26,14 @@
       do: Calendar.strftime(@job_configuration.last_run_at, "%Y-%m-%d %H:%M:%S"),
       else: "Never"}
   </:item>
+  <:item title="User Email">
+    {if assigns[:current_admin] && @job_configuration.user,
+      do: @job_configuration.user.email,
+      else: ""}
+  </:item>
   <:item title="Configuration">
     <pre>{Jason.encode!(@job_configuration.config, pretty: true)}</pre>
   </:item>
 </.list>
 
-<.back navigate={~p"/job_configurations"}>Back to job configurations</.back>
+<.back navigate={~p"/admin/job_configurations"}>Back to job configurations</.back>

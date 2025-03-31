@@ -65,7 +65,12 @@ defmodule Comparoya.MixProject do
       {:sweet_xml, "~> 0.7.4"},
       {:oban, "~> 2.17"},
       {:bcrypt_elixir, "~> 3.0"},
-      {:number, "~> 1.0"}
+      {:number, "~> 1.0"},
+      {:oban_web, "~> 2.11"},
+      {:mock, "~> 0.3.0", only: :test},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:hackney, "~> 1.23"}
     ]
   end
 

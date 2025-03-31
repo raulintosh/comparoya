@@ -8,19 +8,18 @@
 import Config
 
 config :comparoya,
-  ecto_repos: [Comparoya.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  ecto_repos: [Comparoya.Repo]
 
 # Configures the endpoint
 config :comparoya, ComparoyaWeb.Endpoint,
-  url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
+  url: [host: "localhost"],
   render_errors: [
     formats: [html: ComparoyaWeb.ErrorHTML, json: ComparoyaWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: Comparoya.PubSub,
-  live_view: [signing_salt: "mhGS8gHQ"]
+  live_view: [signing_salt: "Yx+Yd+Yd"]
 
 # Configures the mailer
 #
@@ -28,7 +27,7 @@ config :comparoya, ComparoyaWeb.Endpoint,
 # locally. You can see the emails in your browser, at "/dev/mailbox".
 #
 # For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
+# at the `config/runtime.exs` file.
 config :comparoya, Comparoya.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
@@ -43,7 +42,7 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.4.3",
+  version: "3.4.0",
   comparoya: [
     args: ~w(
       --config=tailwind.config.js
@@ -61,29 +60,48 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Configure Ueberauth for authentication
 config :ueberauth, Ueberauth,
   providers: [
     google:
       {Ueberauth.Strategy.Google,
-       [default_scope: "email profile https://www.googleapis.com/auth/gmail.readonly"]}
+       [
+         default_scope: "email profile https://www.googleapis.com/auth/gmail.readonly",
+         prompt: "consent",
+         access_type: "offline"
+       ]}
   ]
 
+# Configure Ueberauth Google strategy
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
-  client_id: {System, :get_env, ["GOOGLE_CLIENT_ID"]},
-  client_secret: {System, :get_env, ["GOOGLE_CLIENT_SECRET"]}
+  client_id: System.get_env("GOOGLE_CLIENT_ID") || "your_client_id",
+  client_secret: System.get_env("GOOGLE_CLIENT_SECRET") || "your_client_secret"
 
-# Configure Oban for background jobs
+# Configure ExAws for DigitalOcean Spaces
+config :ex_aws,
+  access_key_id: System.get_env("DO_SPACES_KEY") || "your_key_here",
+  secret_access_key: System.get_env("DO_SPACES_SECRET") || "your_secret_key_here",
+  region: "sfo3",
+  s3: [
+    scheme: "https://",
+    host: "comparoya.sfo3.digitaloceanspaces.com",
+    region: "sfo3",
+    normalize_path: true,
+    virtual_host: false
+  ]
+
+# Configure Oban for job processing
 config :comparoya, Oban,
   repo: Comparoya.Repo,
   plugins: [
     # 1 week
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
-    {Oban.Plugins.Cron, crontab: []}
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 */3 * * *", Comparoya.Workers.GmailXmlAttachmentWorker}
+     ]}
   ],
-  queues: [gmail: 10, default: 10]
-
-# Configure Quantum for scheduled jobs
-config :comparoya, Comparoya.Scheduler, jobs: []
+  queues: [default: 10, gmail: 5]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

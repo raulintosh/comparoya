@@ -6,6 +6,16 @@
   <.input field={f[:name]} type="text" label="Name" required />
   <.input field={f[:description]} type="textarea" label="Description" />
 
+  <%= if assigns[:current_admin] && assigns[:users] do %>
+    <.input
+      field={f[:user_id]}
+      type="select"
+      label="User"
+      options={Enum.map(@users, fn user -> {user.email, user.id} end)}
+      required
+    />
+  <% end %>
+
   <.input
     field={f[:job_type]}
     type="select"

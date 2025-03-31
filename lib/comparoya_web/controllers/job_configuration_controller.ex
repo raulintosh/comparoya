@@ -1,13 +1,13 @@
 defmodule ComparoyaWeb.JobConfigurationController do
   use ComparoyaWeb, :controller
 
-  import ComparoyaWeb.Plugs.AuthOrAdmin
+  import ComparoyaWeb.Plugs.AdminAuth
 
   alias Comparoya.Jobs
   alias Comparoya.Jobs.JobConfiguration
   alias Comparoya.Jobs.SchedulerManager
 
-  plug :require_authenticated_user_or_admin
+  plug :require_admin
 
   def index(conn, _params) do
     job_configurations =
@@ -25,12 +25,23 @@ defmodule ComparoyaWeb.JobConfigurationController do
           []
       end
 
-    render(conn, :index, job_configurations: job_configurations)
+    render(conn, :index,
+      job_configurations: job_configurations,
+      current_admin: conn.assigns[:current_admin]
+    )
   end
 
   def new(conn, _params) do
     changeset = Jobs.change_job_configuration(%JobConfiguration{})
-    render(conn, :new, changeset: changeset)
+
+    # If admin, fetch all users for the dropdown
+    users = if conn.assigns[:current_admin], do: Comparoya.Accounts.list_users(), else: []
+
+    render(conn, :new,
+      changeset: changeset,
+      current_admin: conn.assigns[:current_admin],
+      users: users
+    )
   end
 
   def create(conn, %{"job_configuration" => job_configuration_params}) do
@@ -64,10 +75,17 @@ defmodule ComparoyaWeb.JobConfigurationController do
 
         conn
         |> put_flash(:info, "Job configuration created successfully.")
-        |> redirect(to: ~p"/job_configurations")
+        |> redirect(to: ~p"/admin/job_configurations")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        # If admin, fetch all users for the dropdown
+        users = if conn.assigns[:current_admin], do: Comparoya.Accounts.list_users(), else: []
+
+        render(conn, :new,
+          changeset: changeset,
+          current_admin: conn.assigns[:current_admin],
+          users: users
+        )
     end
   end
 
@@ -75,11 +93,14 @@ defmodule ComparoyaWeb.JobConfigurationController do
     job_configuration = get_job_configuration(conn, id)
 
     if job_configuration do
-      render(conn, :show, job_configuration: job_configuration)
+      render(conn, :show,
+        job_configuration: job_configuration,
+        current_admin: conn.assigns[:current_admin]
+      )
     else
       conn
       |> put_flash(:error, "Job configuration not found.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     end
   end
 
@@ -88,11 +109,20 @@ defmodule ComparoyaWeb.JobConfigurationController do
 
     if job_configuration do
       changeset = Jobs.change_job_configuration(job_configuration)
-      render(conn, :edit, job_configuration: job_configuration, changeset: changeset)
+
+      # If admin, fetch all users for the dropdown
+      users = if conn.assigns[:current_admin], do: Comparoya.Accounts.list_users(), else: []
+
+      render(conn, :edit,
+        job_configuration: job_configuration,
+        changeset: changeset,
+        current_admin: conn.assigns[:current_admin],
+        users: users
+      )
     else
       conn
       |> put_flash(:error, "Job configuration not found.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     end
   end
 
@@ -107,15 +137,23 @@ defmodule ComparoyaWeb.JobConfigurationController do
 
           conn
           |> put_flash(:info, "Job configuration updated successfully.")
-          |> redirect(to: ~p"/job_configurations/#{job_configuration}")
+          |> redirect(to: ~p"/admin/job_configurations/#{job_configuration}")
 
         {:error, %Ecto.Changeset{} = changeset} ->
-          render(conn, :edit, job_configuration: job_configuration, changeset: changeset)
+          # If admin, fetch all users for the dropdown
+          users = if conn.assigns[:current_admin], do: Comparoya.Accounts.list_users(), else: []
+
+          render(conn, :edit,
+            job_configuration: job_configuration,
+            changeset: changeset,
+            current_admin: conn.assigns[:current_admin],
+            users: users
+          )
       end
     else
       conn
       |> put_flash(:error, "Job configuration not found.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     end
   end
 
@@ -131,11 +169,11 @@ defmodule ComparoyaWeb.JobConfigurationController do
 
       conn
       |> put_flash(:info, "Job configuration deleted successfully.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     else
       conn
       |> put_flash(:error, "Job configuration not found.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     end
   end
 
@@ -148,11 +186,11 @@ defmodule ComparoyaWeb.JobConfigurationController do
 
       conn
       |> put_flash(:info, "Job started successfully.")
-      |> redirect(to: ~p"/job_configurations/#{job_configuration}")
+      |> redirect(to: ~p"/admin/job_configurations/#{job_configuration}")
     else
       conn
       |> put_flash(:error, "Job configuration not found.")
-      |> redirect(to: ~p"/job_configurations")
+      |> redirect(to: ~p"/admin/job_configurations")
     end
   end
 

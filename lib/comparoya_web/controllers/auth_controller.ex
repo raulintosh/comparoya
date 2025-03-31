@@ -42,12 +42,12 @@ defmodule ComparoyaWeb.AuthController do
         name: "Gmail XML Invoice Processor",
         description: "Automatically process XML invoices from Gmail attachments",
         job_type: "gmail_xml_attachment",
-        interval_minutes: 15,
+        interval_minutes: 2,
         enabled: true,
         user_id: user.id,
         config: %{
-          query: "has:attachment filename:xml",
-          max_results: 10
+          query: "has:attachment filename:xml factura",
+          max_results: 100
         }
       }
 

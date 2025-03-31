@@ -17,7 +17,9 @@ defmodule Comparoya.Jobs do
 
   """
   def list_job_configurations do
-    Repo.all(JobConfiguration)
+    JobConfiguration
+    |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   @doc """
@@ -33,6 +35,7 @@ defmodule Comparoya.Jobs do
     JobConfiguration
     |> where([j], j.user_id == ^user_id)
     |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   @doc """
@@ -49,7 +52,11 @@ defmodule Comparoya.Jobs do
       ** (Ecto.NoResultsError)
 
   """
-  def get_job_configuration!(id), do: Repo.get!(JobConfiguration, id)
+  def get_job_configuration!(id) do
+    JobConfiguration
+    |> Repo.get!(id)
+    |> Repo.preload(:user)
+  end
 
   @doc """
   Gets a single job_configuration for a specific user.
@@ -69,6 +76,10 @@ defmodule Comparoya.Jobs do
     JobConfiguration
     |> where([j], j.id == ^id and j.user_id == ^user_id)
     |> Repo.one()
+    |> case do
+      nil -> nil
+      job_config -> Repo.preload(job_config, :user)
+    end
   end
 
   @doc """

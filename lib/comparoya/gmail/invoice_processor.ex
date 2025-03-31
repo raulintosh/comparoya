@@ -15,7 +15,7 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
 
   * `user` - The user to process attachments for
   * `opts` - Options for processing
-    * `:query` - Gmail search query (default: "has:attachment filename:xml")
+    * `:query` - Gmail search query (default: "has:attachment filename:xml factura")
     * `:max_results` - Maximum number of messages to process (default: 10)
 
   ## Returns
@@ -25,8 +25,8 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
   """
   def process_invoice_attachments(%User{} = user, opts \\ []) do
     # Define the callback function to save invoices
-    callback = fn parsed_xml, _filename, _message_id ->
-      save_invoice(parsed_xml, user.id)
+    callback = fn parsed_xml, _filename, _message_id, storage_key ->
+      save_invoice(parsed_xml, user.id, storage_key)
     end
 
     # Add the callback to the options
@@ -52,8 +52,8 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
   """
   def process_invoice_message(message_id, access_token, user_id) do
     # Define the callback function to save invoices
-    callback = fn parsed_xml, _filename, _message_id ->
-      save_invoice(parsed_xml, user_id)
+    callback = fn parsed_xml, _filename, _message_id, storage_key ->
+      save_invoice(parsed_xml, user_id, storage_key)
     end
 
     # Process the message
@@ -67,17 +67,26 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
 
   * `parsed_xml` - The parsed XML data
   * `user_id` - The ID of the user to associate with the invoice (optional)
+  * `storage_key` - The storage key for the XML file in DigitalOcean Spaces (optional)
 
   ## Returns
 
   * `{:ok, result}` - Where result is the created invoice
   * `{:error, reason}` - If an error occurs
   """
-  def save_invoice(parsed_xml, user_id) do
+  def save_invoice(parsed_xml, user_id, storage_key \\ nil) do
     # Set the user ID if not already set
     parsed_xml =
       if is_nil(parsed_xml.user_id) do
         Map.put(parsed_xml, :user_id, user_id)
+      else
+        parsed_xml
+      end
+
+    # Add the storage key if provided
+    parsed_xml =
+      if storage_key do
+        Map.put(parsed_xml, :storage_key, storage_key)
       else
         parsed_xml
       end

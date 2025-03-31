@@ -21,6 +21,7 @@ defmodule Comparoya.Invoices.Invoice do
     field :total_vat, :decimal
 
     field :raw_xml, :string
+    field :storage_key, :string
 
     belongs_to :user, User
     belongs_to :business_entity, BusinessEntity
@@ -49,6 +50,7 @@ defmodule Comparoya.Invoices.Invoice do
       :total_discount,
       :total_vat,
       :raw_xml,
+      :storage_key,
       :user_id,
       :business_entity_id
     ])

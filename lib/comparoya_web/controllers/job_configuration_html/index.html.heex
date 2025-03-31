@@ -1,7 +1,7 @@
 <.header>
   Job Configurations
   <:actions>
-    <.link href={~p"/job_configurations/new"}>
+    <.link href={~p"/admin/job_configurations/new"}>
       <.button>New Job Configuration</.button>
     </.link>
   </:actions>
@@ -20,15 +20,18 @@
       do: Calendar.strftime(job_config.last_run_at, "%Y-%m-%d %H:%M:%S"),
       else: "Never"}
   </:col>
+  <:col :let={job_config} label="User Email">
+    {if assigns[:current_admin], do: job_config.user && job_config.user.email, else: ""}
+  </:col>
   <:action :let={job_config}>
     <div class="sr-only">
-      <.link navigate={~p"/job_configurations/#{job_config}"}>Show</.link>
+      <.link navigate={~p"/admin/job_configurations/#{job_config}"}>Show</.link>
     </div>
-    <.link navigate={~p"/job_configurations/#{job_config}/edit"}>Edit</.link>
+    <.link navigate={~p"/admin/job_configurations/#{job_config}/edit"}>Edit</.link>
   </:action>
   <:action :let={job_config}>
     <.link
-      href={~p"/job_configurations/#{job_config}/run_now"}
+      href={~p"/admin/job_configurations/#{job_config}/run_now"}
       method="post"
       data-confirm="Are you sure you want to run this job now?"
     >
@@ -37,7 +40,7 @@
   </:action>
   <:action :let={job_config}>
     <.link
-      href={~p"/job_configurations/#{job_config}"}
+      href={~p"/admin/job_configurations/#{job_config}"}
       method="delete"
       data-confirm="Are you sure you want to delete this job configuration?"
     >

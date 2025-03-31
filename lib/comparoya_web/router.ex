@@ -4,6 +4,7 @@ defmodule ComparoyaWeb.Router do
   import ComparoyaWeb.Plugs.Auth
   import ComparoyaWeb.Plugs.AdminAuth
   import ComparoyaWeb.Plugs.AuthOrAdmin
+  import Oban.Web.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -32,13 +33,6 @@ defmodule ComparoyaWeb.Router do
     get "/dashboard", DashboardController, :index
   end
 
-  scope "/", ComparoyaWeb do
-    pipe_through [:browser, :require_authenticated_user_or_admin]
-
-    resources "/job_configurations", JobConfigurationController
-    post "/job_configurations/:id/run_now", JobConfigurationController, :run_now
-  end
-
   scope "/auth", ComparoyaWeb do
     pipe_through :browser
 
@@ -60,6 +54,8 @@ defmodule ComparoyaWeb.Router do
     pipe_through [:browser, :admin]
 
     # Add admin-only routes here
+    resources "/job_configurations", JobConfigurationController
+    post "/job_configurations/:id/run_now", JobConfigurationController, :run_now
   end
 
   # Other scopes may use custom stacks.
@@ -79,6 +75,7 @@ defmodule ComparoyaWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
+      oban_dashboard("/oban")
       live_dashboard "/dashboard", metrics: ComparoyaWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
