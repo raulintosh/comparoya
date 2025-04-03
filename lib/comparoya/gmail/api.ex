@@ -18,11 +18,21 @@ defmodule Comparoya.Gmail.API do
   * `:max_results` - Maximum number of messages to return
   * `:page_token` - Page token for pagination
 
+  ## Date Filtering
+
+  You can use the following Gmail search operators for date filtering:
+  * `after:YYYY/MM/DD` - Messages received after the specified date
+  * `before:YYYY/MM/DD` - Messages received before the specified date
+  * `older:YYYY/MM/DD` - Messages older than the specified date
+  * `newer:YYYY/MM/DD` - Messages newer than the specified date
+
   ## Examples
 
       iex> list_messages(access_token, q: "has:attachment")
       {:ok, %{"messages" => [%{"id" => "123", ...}, ...], "nextPageToken" => "token"}}
 
+      iex> list_messages(access_token, q: "has:attachment after:2025/01/01 before:2025/12/31")
+      {:ok, %{"messages" => [%{"id" => "123", ...}, ...], "nextPageToken" => "token"}}
   """
   def list_messages(access_token, opts \\ []) do
     query_params = build_query_params(opts)
@@ -99,7 +109,54 @@ defmodule Comparoya.Gmail.API do
     end
   end
 
+  @doc """
+  Builds a Gmail search query for invoices from the current and previous year.
+
+  ## Parameters
+
+  * `base_query` - The base search query (default: "has:attachment filename:xml {factura OR Factura OR FACTURA}")
+
+  ## Returns
+
+  * A Gmail search query string that includes date filters for the current and previous year
+  """
+  def build_historical_invoice_query(
+        base_query \\ "has:attachment filename:xml {factura OR Factura OR FACTURA}"
+      ) do
+    current_year = Date.utc_today().year
+    previous_year = current_year - 1
+
+    # Format: "base_query after:YYYY/01/01 before:YYYY/12/31"
+    "#{base_query} after:#{previous_year}/01/01 before:#{current_year}/12/31"
+  end
+
+  @doc """
+  Builds a Gmail search query for invoices received since a specific date.
+
+  ## Parameters
+
+  * `start_date` - The start date (Date struct or string in format "YYYY/MM/DD")
+  * `base_query` - The base search query (default: "has:attachment filename:xml {factura OR Factura OR FACTURA}")
+
+  ## Returns
+
+  * A Gmail search query string that includes a date filter for messages after the start date
+  """
+  def build_continuous_invoice_query(
+        start_date,
+        base_query \\ "has:attachment filename:xml {factura OR Factura OR FACTURA}"
+      ) do
+    date_str = format_date_for_query(start_date)
+    "#{base_query} after:#{date_str}"
+  end
+
   # Private functions
+
+  defp format_date_for_query(date) when is_binary(date), do: date
+
+  defp format_date_for_query(%Date{} = date) do
+    "#{date.year}/#{String.pad_leading("#{date.month}", 2, "0")}/#{String.pad_leading("#{date.day}", 2, "0")}"
+  end
 
   defp build_query_params(opts) do
     if Enum.empty?(opts) do

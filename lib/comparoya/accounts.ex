@@ -104,42 +104,62 @@ defmodule Comparoya.Accounts do
 
   @doc """
   Finds or creates a user from OAuth information.
+  Also sets up Gmail invoice processing jobs for new users.
   """
   def find_or_create_user(auth) do
     provider = Atom.to_string(auth.provider)
 
-    case get_user_by_provider(provider, auth.uid) do
-      nil ->
-        # Check if user exists with same email
-        case get_user_by_email(auth.info.email) do
-          nil ->
-            # Create new user
-            User.from_oauth(auth)
-            |> Repo.insert()
+    result =
+      case get_user_by_provider(provider, auth.uid) do
+        nil ->
+          # Check if user exists with same email
+          case get_user_by_email(auth.info.email) do
+            nil ->
+              # Create new user
+              {:new_user, User.from_oauth(auth) |> Repo.insert()}
 
-          existing_user ->
-            # Update existing user with OAuth info
-            existing_user
-            |> User.changeset(%{
-              provider: provider,
-              provider_id: auth.uid,
-              provider_token: auth.credentials.token,
-              refresh_token: auth.credentials.refresh_token,
-              avatar: auth.info.image || existing_user.avatar
-            })
-            |> Repo.update()
-        end
+            existing_user ->
+              # Update existing user with OAuth info
+              {:existing_user,
+               existing_user
+               |> User.changeset(%{
+                 provider: provider,
+                 provider_id: auth.uid,
+                 provider_token: auth.credentials.token,
+                 refresh_token: auth.credentials.refresh_token,
+                 avatar: auth.info.image || existing_user.avatar
+               })
+               |> Repo.update()}
+          end
 
-      existing_user ->
-        # Update token and other info
-        existing_user
-        |> User.changeset(%{
-          provider_token: auth.credentials.token,
-          refresh_token: auth.credentials.refresh_token,
-          name: auth.info.name || existing_user.name,
-          avatar: auth.info.image || existing_user.avatar
-        })
-        |> Repo.update()
+        existing_user ->
+          # Update token and other info
+          {:existing_user,
+           existing_user
+           |> User.changeset(%{
+             provider_token: auth.credentials.token,
+             refresh_token: auth.credentials.refresh_token,
+             name: auth.info.name || existing_user.name,
+             avatar: auth.info.image || existing_user.avatar
+           })
+           |> Repo.update()}
+      end
+
+    # Set up Gmail invoice processing jobs for new users
+    case result do
+      {:new_user, {:ok, user}} ->
+        # This is a new user, set up the jobs
+        alias Comparoya.Jobs
+        Jobs.setup_gmail_invoice_jobs(user.id)
+        {:ok, user}
+
+      {:existing_user, {:ok, user}} ->
+        # This is an existing user, just return the user
+        {:ok, user}
+
+      {_, {:error, changeset}} ->
+        # There was an error, return it
+        {:error, changeset}
     end
   end
 end

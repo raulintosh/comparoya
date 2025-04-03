@@ -109,9 +109,24 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
         end
 
       invoice ->
-        # Invoice already exists
-        Logger.info("Invoice #{invoice.invoice_number} already exists")
-        {:ok, invoice}
+        # Invoice already exists, update the storage key if needed
+        if is_nil(invoice.storage_key) && storage_key do
+          # Update the invoice with the storage key
+          case Invoices.update_invoice_storage_key(invoice, storage_key) do
+            {:ok, updated_invoice} ->
+              Logger.info("Updated storage key for invoice #{invoice.invoice_number}")
+              {:ok, updated_invoice}
+
+            {:error, changeset} ->
+              Logger.error("Failed to update storage key: #{inspect(changeset)}")
+              # Return the original invoice anyway
+              {:ok, invoice}
+          end
+        else
+          # Invoice already exists and has a storage key or no new storage key provided
+          Logger.info("Invoice #{invoice.invoice_number} already exists")
+          {:ok, invoice}
+        end
     end
   end
 end

@@ -86,28 +86,88 @@ defmodule Comparoya.Jobs.SchedulerManager do
   # Private functions
 
   defp schedule_gmail_xml_attachment_job(job_config) do
+    # Determine which type of job to schedule based on the job configuration
+    job_type = get_in(job_config.config, ["job_type"]) || "regular"
+
+    case job_type do
+      "historical" ->
+        schedule_historical_gmail_job(job_config)
+
+      "continuous" ->
+        schedule_continuous_gmail_job(job_config)
+
+      _ ->
+        # Fallback to regular scheduling for backward compatibility
+        schedule_regular_gmail_job(job_config)
+    end
+  end
+
+  # Schedule a historical job that runs once immediately
+  defp schedule_historical_gmail_job(job_config) do
     # Create a unique name for the job
-    job_name = "gmail_xml_attachment_#{job_config.id}"
-
-    # Create the job
-    job = %{
-      name: job_name,
-      schedule: create_schedule(job_config.interval_minutes),
-      task: {__MODULE__, :run_gmail_xml_attachment_job, [job_config.id]},
-      overlap: false
-    }
-
-    # Add the job to the scheduler using the proper Quantum API
+    job_name = "gmail_historical_#{job_config.id}"
     job_name_atom = String.to_atom(job_name)
 
-    # Schedule the job using the proper Quantum API
+    # Schedule the job to run once immediately
     Scheduler.new_job()
     |> Quantum.Job.set_name(job_name_atom)
-    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!(job.schedule))
-    |> Quantum.Job.set_task(job.task)
-    |> Quantum.Job.set_overlap(job.overlap)
+    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!("@once"))
+    |> Quantum.Job.set_task({__MODULE__, :run_gmail_xml_attachment_job, [job_config.id]})
+    |> Quantum.Job.set_overlap(false)
     |> Quantum.Job.set_timezone(:utc)
     |> Scheduler.add_job()
+
+    Logger.info("Scheduled historical Gmail job #{job_name} to run once immediately")
+
+    {:ok, job_name}
+  end
+
+  # Schedule a continuous job that runs every 5 minutes
+  defp schedule_continuous_gmail_job(job_config) do
+    # Create a unique name for the job
+    job_name = "gmail_continuous_#{job_config.id}"
+    job_name_atom = String.to_atom(job_name)
+
+    # Force 5-minute interval for continuous jobs
+    interval_minutes = 5
+
+    # Schedule the job to run every 5 minutes
+    Scheduler.new_job()
+    |> Quantum.Job.set_name(job_name_atom)
+    |> Quantum.Job.set_schedule(
+      Crontab.CronExpression.Parser.parse!("*/#{interval_minutes} * * * *")
+    )
+    |> Quantum.Job.set_task({__MODULE__, :run_gmail_xml_attachment_job, [job_config.id]})
+    |> Quantum.Job.set_overlap(false)
+    |> Quantum.Job.set_timezone(:utc)
+    |> Scheduler.add_job()
+
+    Logger.info(
+      "Scheduled continuous Gmail job #{job_name} to run every #{interval_minutes} minutes"
+    )
+
+    {:ok, job_name}
+  end
+
+  # Schedule a regular job with the configured interval
+  defp schedule_regular_gmail_job(job_config) do
+    # Create a unique name for the job
+    job_name = "gmail_xml_attachment_#{job_config.id}"
+    job_name_atom = String.to_atom(job_name)
+
+    # Create the schedule based on the configured interval
+    schedule = create_schedule(job_config.interval_minutes)
+
+    # Schedule the job
+    Scheduler.new_job()
+    |> Quantum.Job.set_name(job_name_atom)
+    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!(schedule))
+    |> Quantum.Job.set_task({__MODULE__, :run_gmail_xml_attachment_job, [job_config.id]})
+    |> Quantum.Job.set_overlap(false)
+    |> Quantum.Job.set_timezone(:utc)
+    |> Scheduler.add_job()
+
+    Logger.info("Scheduled regular Gmail job #{job_name} with schedule: #{schedule}")
 
     {:ok, job_name}
   end

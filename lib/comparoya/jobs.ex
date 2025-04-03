@@ -198,4 +198,67 @@ defmodule Comparoya.Jobs do
   def get_enabled_configurations_for_user(user_id) do
     JobConfiguration.get_enabled_configurations_for_user(user_id)
   end
+
+  @doc """
+  Sets up Gmail invoice processing jobs for a newly registered user.
+  Creates two job configurations:
+  1. A historical job that runs once to process invoices from the current and previous year
+  2. A continuous job that runs every 5 minutes to process new invoices
+
+  ## Parameters
+
+  * `user_id` - The ID of the user to set up jobs for
+
+  ## Returns
+
+  * `{:ok, [historical_job, continuous_job]}` - The created job configurations
+  * `{:error, reason}` - If an error occurs
+
+  ## Examples
+
+      iex> setup_gmail_invoice_jobs(user_id)
+      {:ok, [%JobConfiguration{}, %JobConfiguration{}]}
+
+  """
+  def setup_gmail_invoice_jobs(user_id) do
+    # Create the historical job configuration
+    historical_attrs = %{
+      name: "Historical Invoice Processing",
+      description: "Processes invoices from the current and previous year (runs once)",
+      job_type: "gmail_xml_attachment",
+      # Not actually used for historical jobs
+      interval_minutes: 60,
+      enabled: true,
+      user_id: user_id,
+      config: %{
+        "job_type" => "historical",
+        "max_results" => 100
+      }
+    }
+
+    # Create the continuous job configuration
+    continuous_attrs = %{
+      name: "Continuous Invoice Processing",
+      description: "Processes new invoices every 5 minutes",
+      job_type: "gmail_xml_attachment",
+      interval_minutes: 5,
+      enabled: true,
+      user_id: user_id,
+      config: %{
+        "job_type" => "continuous",
+        "max_results" => 20
+      }
+    }
+
+    # Create both job configurations
+    with {:ok, historical_job} <- create_job_configuration(historical_attrs),
+         {:ok, continuous_job} <- create_job_configuration(continuous_attrs) do
+      # Return both job configurations
+      {:ok, [historical_job, continuous_job]}
+    else
+      {:error, changeset} ->
+        # If there's an error, return it
+        {:error, changeset}
+    end
+  end
 end

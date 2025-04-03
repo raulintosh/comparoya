@@ -144,28 +144,71 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
 
   # Upload file to DigitalOcean Spaces
   defp upload_to_spaces(data, filename) do
-    # Generate a unique key for the file in the "facturas" folder
-    key = "facturas/#{DateTime.utc_now() |> DateTime.to_iso8601()}_#{filename}"
+    # Generate a deterministic key based on the content hash and filename
+    # This ensures the same file will have the same key, preventing duplicates
+    content_hash = :crypto.hash(:sha256, data) |> Base.encode16(case: :lower)
+    key = "facturas/#{content_hash}_#{filename}"
 
-    # Upload the file to DigitalOcean Spaces
+    # Check if the file already exists in DigitalOcean Spaces
+    case check_if_file_exists("facturas", key) do
+      {:ok, true} ->
+        # File already exists, return the key without uploading again
+        Logger.info("File #{filename} already exists in DigitalOcean Spaces with key #{key}")
+        {:ok, key}
+
+      {:ok, false} ->
+        # File doesn't exist, upload it
+        try do
+          result =
+            S3.put_object("facturas", key, data)
+            |> ExAws.request()
+
+          case result do
+            {:ok, _response} ->
+              Logger.info("Successfully uploaded #{filename} to DigitalOcean Spaces")
+              {:ok, key}
+
+            {:error, error} ->
+              Logger.error(
+                "Failed to upload #{filename} to DigitalOcean Spaces: #{inspect(error)}"
+              )
+
+              {:error, "Failed to upload to DigitalOcean Spaces: #{inspect(error)}"}
+          end
+        rescue
+          e ->
+            Logger.error("Error uploading to DigitalOcean Spaces: #{inspect(e)}")
+            {:error, "Error uploading to DigitalOcean Spaces: #{inspect(e)}"}
+        end
+
+      {:error, error} ->
+        # Error checking if file exists
+        Logger.error("Error checking if file exists in DigitalOcean Spaces: #{inspect(error)}")
+        {:error, "Error checking if file exists: #{inspect(error)}"}
+    end
+  end
+
+  # Check if a file exists in DigitalOcean Spaces
+  defp check_if_file_exists(bucket, key) do
     try do
-      result =
-        S3.put_object("comparoya", key, data)
-        |> ExAws.request()
+      # Use head_object to check if the file exists without downloading it
+      case ExAws.S3.head_object(bucket, key) |> ExAws.request() do
+        {:ok, _} ->
+          # File exists
+          {:ok, true}
 
-      case result do
-        {:ok, _response} ->
-          Logger.info("Successfully uploaded #{filename} to DigitalOcean Spaces")
-          {:ok, key}
+        {:error, {:http_error, 404, _}} ->
+          # File doesn't exist (404 Not Found)
+          {:ok, false}
 
         {:error, error} ->
-          Logger.error("Failed to upload #{filename} to DigitalOcean Spaces: #{inspect(error)}")
-          {:error, "Failed to upload to DigitalOcean Spaces: #{inspect(error)}"}
+          # Other error
+          {:error, error}
       end
     rescue
       e ->
-        Logger.error("Error uploading to DigitalOcean Spaces: #{inspect(e)}")
-        {:error, "Error uploading to DigitalOcean Spaces: #{inspect(e)}"}
+        # Exception occurred
+        {:error, e}
     end
   end
 
@@ -348,7 +391,11 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     invoice_type_description = xpath(xml, ~x"//gTimb/dDesTiDE/text()"s)
 
     # Get dates
-    emission_date = parse_datetime(xpath(xml, ~x"//gDatGralOpe/dFeEmiDE/text()"s))
+    emission_date =
+      parse_datetime(xpath(xml, ~x"//DE/gDatGralOpe/dFeEmiDE/text()"s))
+
+    IO.inspect(emission_date, label: "Emision DATE")
+
     signature_date = parse_datetime(xpath(xml, ~x"//dFecFirma/text()"s))
 
     # Get security code
@@ -468,8 +515,21 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   # Helper function to parse datetime strings
   defp parse_datetime(datetime_str) do
     case DateTime.from_iso8601(datetime_str) do
-      {:ok, datetime, _} -> datetime
-      _ -> nil
+      {:ok, datetime, _} ->
+        datetime
+
+      {:error, :missing_offset} ->
+        # Handle dates without timezone offset by assuming UTC
+        case NaiveDateTime.from_iso8601(datetime_str) do
+          {:ok, naive_datetime} ->
+            DateTime.from_naive!(naive_datetime, "Etc/UTC")
+
+          _ ->
+            nil
+        end
+
+      _ ->
+        nil
     end
   end
 

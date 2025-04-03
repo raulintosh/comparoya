@@ -3,8 +3,8 @@ defmodule ComparoyaWeb.Router do
 
   import ComparoyaWeb.Plugs.Auth
   import ComparoyaWeb.Plugs.AdminAuth
-  import ComparoyaWeb.Plugs.AuthOrAdmin
   import Oban.Web.Router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -45,8 +45,8 @@ defmodule ComparoyaWeb.Router do
 
     get "/login", AdminAuthController, :login_form
     post "/login", AdminAuthController, :login
-    get "/register", AdminAuthController, :register_form
-    post "/register", AdminAuthController, :register
+    # get "/register", AdminAuthController, :register_form
+    # post "/register", AdminAuthController, :register
     get "/logout", AdminAuthController, :logout
   end
 

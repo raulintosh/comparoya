@@ -226,4 +226,22 @@ defmodule Comparoya.Invoices do
   def find_user_by_email(email) do
     Repo.get_by(User, email: email)
   end
+
+  @doc """
+  Updates the storage key for an invoice.
+
+  ## Examples
+
+      iex> update_invoice_storage_key(invoice, "new_storage_key")
+      {:ok, %Invoice{}}
+
+      iex> update_invoice_storage_key(invoice, nil)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_invoice_storage_key(%Invoice{} = invoice, storage_key) when is_binary(storage_key) do
+    invoice
+    |> Invoice.changeset(%{storage_key: storage_key})
+    |> Repo.update()
+  end
 end
