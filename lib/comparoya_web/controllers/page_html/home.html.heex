@@ -1,18 +1,29 @@
 <.flash_group flash={@flash} />
 
 <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-  <div class="absolute top-0 right-0 p-4">
-    <a href="/admin/login" class="text-blue-600 hover:text-blue-800 font-medium">
-      Acceso Administrador
-    </a>
-  </div>
-
   <div class="container mx-auto px-4 py-16 flex flex-col items-center">
-    <div class="text-center mb-16">
+    <div class="mb-8">
+      <img src="/images/comparoya_logo.png" alt="ComparoYa Logo" class="h-32 w-32" />
+    </div>
+
+    <div class="text-center mb-8">
       <h1 class="text-5xl font-bold text-blue-800 mb-6">ComparoYa</h1>
-      <p class="text-2xl text-gray-700 max-w-3xl mx-auto">
+      <p class="text-2xl text-gray-700 max-w-3xl mx-auto mb-8">
         Compara precios de productos automáticamente utilizando la información de tus facturas electrónicas
       </p>
+
+      <a
+        href="/auth/google"
+        class="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+      >
+        <svg class="w-6 h-6 mr-3" viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+          />
+        </svg>
+        Conectar con Google
+      </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-xl p-8 max-w-4xl w-full mb-16">
@@ -189,19 +200,6 @@
       <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
         Conecta tu cuenta de Gmail para empezar a comparar precios y ahorrar en tus compras.
       </p>
-
-      <a
-        href="/auth/google"
-        class="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-      >
-        <svg class="w-6 h-6 mr-3" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-          />
-        </svg>
-        Conectar con Google
-      </a>
     </div>
 
     <footer class="text-center text-gray-500 text-sm">
@@ -213,6 +211,10 @@
         <span class="text-gray-400">|</span>
         <a href="/terms-of-service" class="text-blue-600 hover:text-blue-800">
           Condiciones del Servicio
+        </a>
+        <span class="text-gray-400">|</span>
+        <a href="/admin/login" class="text-blue-600 hover:text-blue-800">
+          Acceso Administrador
         </a>
       </div>
     </footer>
