@@ -29,6 +29,8 @@ defmodule ComparoyaWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/privacy-policy", PageController, :privacy_policy
+    get "/terms-of-service", PageController, :terms_of_service
     get "/logout", AuthController, :logout
     get "/dashboard", DashboardController, :index
   end
