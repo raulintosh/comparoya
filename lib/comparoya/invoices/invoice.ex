@@ -23,6 +23,12 @@ defmodule Comparoya.Invoices.Invoice do
     field :raw_xml, :string
     field :storage_key, :string
 
+    # Geolocation fields
+    field :latitude, :float
+    field :longitude, :float
+    field :geocoding_status, :string
+    field :geocoding_error, :string
+
     belongs_to :user, User
     belongs_to :business_entity, BusinessEntity
     has_many :items, InvoiceItem
@@ -52,7 +58,11 @@ defmodule Comparoya.Invoices.Invoice do
       :raw_xml,
       :storage_key,
       :user_id,
-      :business_entity_id
+      :business_entity_id,
+      :latitude,
+      :longitude,
+      :geocoding_status,
+      :geocoding_error
     ])
     |> validate_required([
       :invoice_number,

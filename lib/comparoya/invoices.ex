@@ -88,54 +88,68 @@ defmodule Comparoya.Invoices do
 
   """
   def create_invoice(attrs) do
-    Repo.transaction(fn ->
-      # Create or get business entity
-      {:ok, business_entity} = create_or_get_business_entity(attrs.business_entity)
+    result =
+      Repo.transaction(fn ->
+        # Create or get business entity
+        {:ok, business_entity} = create_or_get_business_entity(attrs.business_entity)
 
-      # Create invoice
-      invoice_attrs =
-        Map.merge(attrs.invoice, %{
-          business_entity_id: business_entity.id,
-          user_id: attrs.user_id
-        })
+        # Create invoice
+        invoice_attrs =
+          Map.merge(attrs.invoice, %{
+            business_entity_id: business_entity.id,
+            user_id: attrs.user_id,
+            geocoding_status: "pending"
+          })
 
-      {:ok, invoice} =
-        %Invoice{}
-        |> Invoice.changeset(invoice_attrs)
-        |> Repo.insert()
+        {:ok, invoice} =
+          %Invoice{}
+          |> Invoice.changeset(invoice_attrs)
+          |> Repo.insert()
 
-      # Create invoice items
-      items =
-        Enum.map(attrs.items, fn item_attrs ->
-          # Create or get product reference
-          {:ok, product_reference} = create_or_get_product_reference(item_attrs.product_reference)
+        # Create invoice items
+        items =
+          Enum.map(attrs.items, fn item_attrs ->
+            # Create or get product reference
+            {:ok, product_reference} =
+              create_or_get_product_reference(item_attrs.product_reference)
 
-          # Create invoice item
-          {:ok, item} =
-            %InvoiceItem{}
-            |> InvoiceItem.changeset(
-              Map.merge(item_attrs, %{
-                invoice_id: invoice.id,
-                product_reference_id: product_reference.id
-              })
-            )
-            |> Repo.insert()
+            # Create invoice item
+            {:ok, item} =
+              %InvoiceItem{}
+              |> InvoiceItem.changeset(
+                Map.merge(item_attrs, %{
+                  invoice_id: invoice.id,
+                  product_reference_id: product_reference.id
+                })
+              )
+              |> Repo.insert()
 
-          item
-        end)
+            item
+          end)
 
-      # Create invoice metadata
-      {:ok, metadata} =
-        %InvoiceMetadata{}
-        |> InvoiceMetadata.changeset(Map.merge(attrs.metadata, %{invoice_id: invoice.id}))
-        |> Repo.insert()
+        # Create invoice metadata
+        {:ok, metadata} =
+          %InvoiceMetadata{}
+          |> InvoiceMetadata.changeset(Map.merge(attrs.metadata, %{invoice_id: invoice.id}))
+          |> Repo.insert()
 
-      %{
-        invoice: invoice,
-        items: items,
-        metadata: metadata
-      }
-    end)
+        %{
+          invoice: invoice,
+          items: items,
+          metadata: metadata
+        }
+      end)
+
+    case result do
+      {:ok, %{invoice: invoice} = result} ->
+        # Enqueue geocoding job
+        Comparoya.Geocoding.enqueue_geocoding_job(invoice)
+
+        {:ok, result}
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -213,19 +227,31 @@ defmodule Comparoya.Invoices do
 
   @doc """
   Finds a user by email.
+  Performs a case-insensitive comparison to handle emails in different cases.
 
   ## Examples
 
       iex> find_user_by_email("user@example.com")
       %User{}
 
+      iex> find_user_by_email("USER@EXAMPLE.COM")
+      %User{}
+
       iex> find_user_by_email("nonexistent@example.com")
       nil
 
   """
-  def find_user_by_email(email) do
-    Repo.get_by(User, email: email)
+  def find_user_by_email(email) when is_binary(email) do
+    # Convert email to lowercase for case-insensitive comparison
+    downcased_email = String.downcase(email)
+
+    # Use a query with a case-insensitive comparison
+    User
+    |> where([u], fragment("lower(?)", u.email) == ^downcased_email)
+    |> Repo.one()
   end
+
+  def find_user_by_email(_), do: nil
 
   @doc """
   Updates the storage key for an invoice.

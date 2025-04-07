@@ -147,7 +147,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     # Generate a deterministic key based on the content hash and filename
     # This ensures the same file will have the same key, preventing duplicates
     content_hash = :crypto.hash(:sha256, data) |> Base.encode16(case: :lower)
-    key = "facturas/#{content_hash}_#{filename}"
+    key = "#{content_hash}_#{filename}"
 
     # Check if the file already exists in DigitalOcean Spaces
     case check_if_file_exists("facturas", key) do

@@ -58,6 +58,11 @@ defmodule ComparoyaWeb.Router do
     # Add admin-only routes here
     resources "/job_configurations", JobConfigurationController
     post "/job_configurations/:id/run_now", JobConfigurationController, :run_now
+
+    # Geocoding routes
+    get "/geocoding", AdminGeocodingController, :index
+    post "/geocoding/start_batch", AdminGeocodingController, :start_batch
+    post "/geocoding/update_coordinates/:id", AdminGeocodingController, :update_coordinates
   end
 
   # Other scopes may use custom stacks.

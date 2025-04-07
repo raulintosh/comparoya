@@ -109,9 +109,20 @@ defmodule Comparoya.Jobs.SchedulerManager do
     job_name_atom = String.to_atom(job_name)
 
     # Schedule the job to run once immediately
+    # Use a specific time instead of @once which is not supported in crontab 1.1.14
+    # This will run the job at the next minute
+    now = DateTime.utc_now()
+    minute = now.minute
+    hour = now.hour
+    day = now.day
+    month = now.month
+
+    # Create a cron expression that will run once at the next minute
+    cron_expression = "#{rem(minute + 1, 60)} #{hour} #{day} #{month} *"
+
     Scheduler.new_job()
     |> Quantum.Job.set_name(job_name_atom)
-    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!("@once"))
+    |> Quantum.Job.set_schedule(Crontab.CronExpression.Parser.parse!(cron_expression))
     |> Quantum.Job.set_task({__MODULE__, :run_gmail_xml_attachment_job, [job_config.id]})
     |> Quantum.Job.set_overlap(false)
     |> Quantum.Job.set_timezone(:utc)

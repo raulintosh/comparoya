@@ -10,6 +10,13 @@ import Config
 config :comparoya,
   ecto_repos: [Comparoya.Repo]
 
+# Repo configuration
+config :comparoya, Comparoya.Repo, []
+
+# Configure Google Maps API
+config :comparoya, :google_maps,
+  api_key: System.get_env("GOOGLE_MAPS_API_KEY") || "your_api_key_here"
+
 # Configures the endpoint
 config :comparoya, ComparoyaWeb.Endpoint,
   adapter: Bandit.PhoenixAdapter,
@@ -101,7 +108,7 @@ config :comparoya, Oban,
        {"0 */3 * * *", Comparoya.Workers.GmailXmlAttachmentWorker}
      ]}
   ],
-  queues: [default: 10, gmail: 5]
+  queues: [default: 10, gmail: 5, geocoding: 5]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
