@@ -47,43 +47,93 @@
             No se encontraron productos. Procesa algunas facturas para ver datos de productos.
           </p>
         <% else %>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Descripción
+          <div class="overflow-x-auto hs-table-advanced relative">
+            <table class="table-auto divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-800">
+                <tr class="text-left">
+                  <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    <div class="flex items-center h-5">
+                      <button class="sort">
+                        Descripción
+                        <svg
+                          class="ml-2 w-2.5 h-2.5 text-gray-400"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M11 10.0001L8 7.00012L5 10.0001M8 6.00012L11 9.00012L5 9.00012"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </th>
-                  <th
-                    scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Precio Reciente
+
+                  <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    <div class="flex items-center h-5">
+                      <button class="sort">
+                        Precio Reciente
+                        <svg
+                          class="ml-2 w-2.5 h-2.5 text-gray-400"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M11 10.0001L8 7.00012L5 10.0001M8 6.00012L11 9.00012L5 9.00012"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </th>
-                  <th
-                    scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Actualizado
+
+                  <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase">
+                    <div class="flex items-center h-5">
+                      <button class="sort">
+                        Actualizado
+                        <svg
+                          class="ml-2 w-2.5 h-2.5 text-gray-400"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M11 10.0001L8 7.00012L5 10.0001M8 6.00012L11 9.00012L5 9.00012"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 <%= for product <- @products_with_prices do %>
-                  <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.description}
+                  <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                      <div class="font-medium text-gray-800 dark:text-gray-200">
+                        {product.description}
+                      </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      Gs. {product.latest_price
-                      |> Decimal.to_float()
-                      |> trunc()
-                      |> Number.Delimit.number_to_delimited(delimiter: ".", precision: 0)}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                      Gs. {product.latest_price |> Decimal.to_float() |> trunc() |> Number.Delimit.number_to_delimited(delimiter: ".", precision: 0)}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
                       {Calendar.strftime(product.latest_invoice_date, "%d/%m/%Y")}
                     </td>
                   </tr>
