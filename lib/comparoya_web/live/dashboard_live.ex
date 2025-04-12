@@ -1,54 +1,98 @@
-defmodule ComparoyaWeb.DashboardController do
-  use ComparoyaWeb, :controller
+defmodule ComparoyaWeb.DashboardLive do
+  use ComparoyaWeb, :live_view
 
-  import ComparoyaWeb.Plugs.AuthOrAdmin
   import Ecto.Query, warn: false
 
   alias Comparoya.Repo
   alias Comparoya.Invoices
   alias Comparoya.Invoices.{Invoice, InvoiceItem, ProductReference}
 
-  plug :require_authenticated_user_or_admin
+  on_mount {ComparoyaWeb.Live.AuthOrAdminLive, :require_authenticated_user_or_admin}
 
-  def index(conn, params) do
-    # Use either the current_user or current_admin
-    user = conn.assigns[:current_user] || conn.assigns[:current_admin]
+  @per_page 25
 
+  @impl true
+  def mount(_params, _session, socket) do
     # Get invoices for the user
+    user = socket.assigns.current_user
     invoices = Invoices.list_user_invoices(user)
     invoice_count = length(invoices)
 
+    socket =
+      socket
+      |> assign(:invoice_count, invoice_count)
+      |> assign(:search_term, "")
+      |> assign(:current_page, 1)
+      |> assign(:total_pages, 1)
+      |> assign(:sort_by, "emission_date")
+      |> assign(:sort_order, "desc")
+      |> assign(:products_with_prices, [])
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
     # Extract search, pagination and sorting parameters
     search_term = params["search"] || ""
     page = String.to_integer(params["page"] || "1")
-    per_page = 25
     sort_by = params["sort_by"] || "emission_date"
     sort_order = params["sort_order"] || "desc"
 
+    user = socket.assigns.current_user
+
     # Get products with latest prices
     {products_with_prices, total_count} =
-      get_products_with_latest_prices(
-        user.id,
-        search_term,
-        page,
-        per_page,
-        sort_by,
-        sort_order
-      )
+      if user do
+        get_products_with_latest_prices(
+          user.id,
+          search_term,
+          page,
+          @per_page,
+          sort_by,
+          sort_order
+        )
+      else
+        {[], 0}
+      end
 
     # Calculate pagination data
-    total_pages = ceil(total_count / per_page)
+    total_pages = ceil(total_count / @per_page)
 
-    render(conn, :index,
-      current_user: user,
-      invoice_count: invoice_count,
-      products_with_prices: products_with_prices,
-      search_term: search_term,
-      current_page: page,
-      total_pages: total_pages,
-      sort_by: sort_by,
-      sort_order: sort_order
-    )
+    socket =
+      socket
+      |> assign(:products_with_prices, products_with_prices)
+      |> assign(:search_term, search_term)
+      |> assign(:current_page, page)
+      |> assign(:total_pages, total_pages)
+      |> assign(:sort_by, sort_by)
+      |> assign(:sort_order, sort_order)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("search", %{"search" => search_term}, socket) do
+    params = %{
+      "search" => search_term,
+      "sort_by" => socket.assigns.sort_by,
+      "sort_order" => socket.assigns.sort_order
+    }
+
+    {:noreply, push_patch(socket, to: ~p"/dashboard?#{params}")}
+  end
+
+  @impl true
+  def handle_event("search_debounced", %{"value" => search_term}, socket) do
+    params = %{
+      "search" => search_term,
+      "sort_by" => socket.assigns.sort_by,
+      "sort_order" => socket.assigns.sort_order,
+      # Reset to first page on new search
+      "page" => "1"
+    }
+
+    {:noreply, push_patch(socket, to: ~p"/dashboard?#{params}")}
   end
 
   # Get products with their latest prices from invoices

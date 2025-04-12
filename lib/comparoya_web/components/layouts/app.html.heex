@@ -1,35 +1,10 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v{Application.spec(:phoenix, :vsn)}
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <%= if @current_user do %>
-        <div class="flex items-center gap-2">
-          <%= if @current_user.avatar do %>
-            <img src={@current_user.avatar} class="h-8 w-8 rounded-full" alt="User avatar" />
-          <% end %>
-          <span>{@current_user.name || @current_user.email}</span>
-        </div>
-        <a href="/logout" class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
-          Cerrar Sesión
-        </a>
-      <% else %>
-        <a href="/auth/google" class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80">
-          Iniciar Sesión con Google
-        </a>
-      <% end %>
-    </div>
-  </div>
-</header>
-<main class="px-4 py-8 sm:px-6 lg:px-8">
-  <div class="w-full">
+<ComparoyaWeb.Navigation.responsive_navbar current_user={@current_user} />
+
+<main class="flex-grow py-8">
+  <ComparoyaWeb.LayoutComponents.responsive_container>
     <.flash_group flash={@flash} />
     {@inner_content}
-  </div>
+  </ComparoyaWeb.LayoutComponents.responsive_container>
 </main>
+
+<ComparoyaWeb.LayoutComponents.responsive_footer />

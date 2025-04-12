@@ -6,6 +6,7 @@ defmodule Comparoya.Invoices.BusinessEntity do
   schema "business_entities" do
     field :ruc, :string
     field :name, :string
+    field :slug, :string
     field :address, :string
     field :department_code, :string
     field :department_description, :string
@@ -31,6 +32,7 @@ defmodule Comparoya.Invoices.BusinessEntity do
     |> cast(attrs, [
       :ruc,
       :name,
+      :slug,
       :address,
       :department_code,
       :department_description,

@@ -9,17 +9,29 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/comparoya_web.ex",
-    "../lib/comparoya_web/**/*.*ex"
+    "../lib/comparoya_web/**/*.*ex",
+    // Add this line to include Preline's JS files when they're added
+    "./node_modules/preline/dist/*.js"
   ],
   theme: {
     extend: {
       colors: {
-        brand: "#FD4F00",
-      }
+        brand: "#4CAF50", // Green color for ComparoYa
+      },
+      // Add responsive breakpoints for better control
+      screens: {
+        'xs': '480px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
     },
   },
   plugins: [
     require("@tailwindcss/forms"),
+    // We'll add Preline plugin when it's available
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //

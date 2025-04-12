@@ -32,7 +32,8 @@ defmodule ComparoyaWeb.Router do
     get "/privacy-policy", PageController, :privacy_policy
     get "/terms-of-service", PageController, :terms_of_service
     get "/logout", AuthController, :logout
-    get "/dashboard", DashboardController, :index
+
+    live "/dashboard", DashboardLive, :index
   end
 
   scope "/auth", ComparoyaWeb do
