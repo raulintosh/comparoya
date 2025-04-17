@@ -365,7 +365,10 @@
                       |> Number.Delimit.number_to_delimited(delimiter: ".", precision: 0)}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-black dark:text-white font-medium">
-                      {Calendar.strftime(product.latest_invoice_date, "%d/%m/%Y")}
+                      {ComparoyaWeb.TimeDuration.get_time_duration(product.latest_invoice_date)}
+                      <span class="text-xs text-gray-500 block">
+                        {Calendar.strftime(product.latest_invoice_date, "%d/%m/%Y")}
+                      </span>
                     </td>
                   </tr>
                 <% end %>

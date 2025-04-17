@@ -6,6 +6,7 @@ defmodule ComparoyaWeb.DashboardLive do
   alias Comparoya.Repo
   alias Comparoya.Invoices
   alias Comparoya.Invoices.{Invoice, InvoiceItem, ProductReference}
+  alias ComparoyaWeb.TimeDuration
 
   on_mount {ComparoyaWeb.Live.AuthOrAdminLive, :require_authenticated_user_or_admin}
 
