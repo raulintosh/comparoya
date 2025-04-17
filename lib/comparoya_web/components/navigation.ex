@@ -73,6 +73,16 @@ defmodule ComparoyaWeb.Navigation do
                 <span class="text-sm font-medium text-gray-800">
                   {@current_user.name || @current_user.email}
                 </span>
+
+                <%= if assigns[:current_admin] do %>
+                  <a
+                    href="/admin/change_password"
+                    class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-brand transition-all text-sm"
+                  >
+                    Change Password
+                  </a>
+                <% end %>
+
                 <a
                   href="/logout"
                   class="py-2 px-3 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-brand transition-all text-sm"

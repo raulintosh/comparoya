@@ -1,11 +1,13 @@
-<.header>
-  Edit Job Configuration
-  <:subtitle>Edit job configuration {@job_configuration.name}</:subtitle>
-</.header>
+<.admin_layout current_admin={@current_admin}>
+  <.header>
+    Edit Job Configuration
+    <:subtitle>Edit job configuration {@job_configuration.name}</:subtitle>
+  </.header>
 
-<.job_configuration_form
-  changeset={@changeset}
-  action={~p"/job_configurations/#{@job_configuration}"}
-/>
+  <.job_configuration_form
+    changeset={@changeset}
+    action={~p"/admin/job_configurations/#{@job_configuration}"}
+  />
 
-<.back navigate={~p"/job_configurations"}>Back to job configurations</.back>
+  <.back navigate={~p"/admin/job_configurations"}>Back to job configurations</.back>
+</.admin_layout>

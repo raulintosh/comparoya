@@ -56,6 +56,10 @@ defmodule ComparoyaWeb.Router do
   scope "/admin", ComparoyaWeb do
     pipe_through [:browser, :admin]
 
+    # Change password routes
+    get "/change_password", AdminAuthController, :change_password_form
+    post "/change_password", AdminAuthController, :change_password
+
     # Add admin-only routes here
     resources "/job_configurations", JobConfigurationController
     post "/job_configurations/:id/run_now", JobConfigurationController, :run_now

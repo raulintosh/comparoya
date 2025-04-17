@@ -1,6 +1,8 @@
 defmodule ComparoyaWeb.JobConfigurationHTML do
   use ComparoyaWeb, :html
 
+  import ComparoyaWeb.AdminLayout
+
   embed_templates "job_configuration_html/*"
 
   @doc """

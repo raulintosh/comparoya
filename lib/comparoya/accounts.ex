@@ -103,6 +103,22 @@ defmodule Comparoya.Accounts do
   def is_admin?(_), do: false
 
   @doc """
+  Changes a user's password.
+
+  Requires the current password for verification.
+  Returns {:ok, user} if successful, {:error, changeset} otherwise.
+  """
+  def change_user_password(%User{} = user, current_password, new_password) do
+    if Bcrypt.verify_pass(current_password, user.password_hash) do
+      user
+      |> User.password_changeset(%{password: new_password})
+      |> Repo.update()
+    else
+      {:error, :invalid_current_password}
+    end
+  end
+
+  @doc """
   Finds or creates a user from OAuth information.
   Also sets up Gmail invoice processing jobs for new users.
   """

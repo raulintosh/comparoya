@@ -72,6 +72,17 @@ defmodule Comparoya.Accounts.User do
   defp put_password_hash(changeset), do: changeset
 
   @doc """
+  Changeset for changing a user's password
+  """
+  def password_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:password])
+    |> validate_required([:password])
+    |> validate_length(:password, min: 6, max: 100)
+    |> put_password_hash()
+  end
+
+  @doc """
   Creates a user from OAuth information
   """
   def from_oauth(auth) do

@@ -1,50 +1,52 @@
-<.header>
-  Job Configurations
-  <:actions>
-    <.link href={~p"/admin/job_configurations/new"}>
-      <.button>New Job Configuration</.button>
-    </.link>
-  </:actions>
-</.header>
+<.admin_layout current_admin={@current_admin}>
+  <.header>
+    Job Configurations
+    <:actions>
+      <.link href={~p"/admin/job_configurations/new"}>
+        <.button>New Job Configuration</.button>
+      </.link>
+    </:actions>
+  </.header>
 
-<.table id="job_configurations" rows={@job_configurations}>
-  <:col :let={job_config} label="Name">{job_config.name}</:col>
-  <:col :let={job_config} label="Description">{job_config.description}</:col>
-  <:col :let={job_config} label="Job Type">{job_config.job_type}</:col>
-  <:col :let={job_config} label="Interval (minutes)">{job_config.interval_minutes}</:col>
-  <:col :let={job_config} label="Enabled">
-    {if job_config.enabled, do: "Yes", else: "No"}
-  </:col>
-  <:col :let={job_config} label="Last Run">
-    {if job_config.last_run_at,
-      do: Calendar.strftime(job_config.last_run_at, "%Y-%m-%d %H:%M:%S"),
-      else: "Never"}
-  </:col>
-  <:col :let={job_config} label="User Email">
-    {if assigns[:current_admin], do: job_config.user && job_config.user.email, else: ""}
-  </:col>
-  <:action :let={job_config}>
-    <div class="sr-only">
-      <.link navigate={~p"/admin/job_configurations/#{job_config}"}>Show</.link>
-    </div>
-    <.link navigate={~p"/admin/job_configurations/#{job_config}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={job_config}>
-    <.link
-      href={~p"/admin/job_configurations/#{job_config}/run_now"}
-      method="post"
-      data-confirm="Are you sure you want to run this job now?"
-    >
-      Run Now
-    </.link>
-  </:action>
-  <:action :let={job_config}>
-    <.link
-      href={~p"/admin/job_configurations/#{job_config}"}
-      method="delete"
-      data-confirm="Are you sure you want to delete this job configuration?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+  <.table id="job_configurations" rows={@job_configurations}>
+    <:col :let={job_config} label="Name">{job_config.name}</:col>
+    <:col :let={job_config} label="Description">{job_config.description}</:col>
+    <:col :let={job_config} label="Job Type">{job_config.job_type}</:col>
+    <:col :let={job_config} label="Interval (minutes)">{job_config.interval_minutes}</:col>
+    <:col :let={job_config} label="Enabled">
+      {if job_config.enabled, do: "Yes", else: "No"}
+    </:col>
+    <:col :let={job_config} label="Last Run">
+      {if job_config.last_run_at,
+        do: Calendar.strftime(job_config.last_run_at, "%Y-%m-%d %H:%M:%S"),
+        else: "Never"}
+    </:col>
+    <:col :let={job_config} label="User Email">
+      {if assigns[:current_admin], do: job_config.user && job_config.user.email, else: ""}
+    </:col>
+    <:action :let={job_config}>
+      <div class="sr-only">
+        <.link navigate={~p"/admin/job_configurations/#{job_config}"}>Show</.link>
+      </div>
+      <.link navigate={~p"/admin/job_configurations/#{job_config}/edit"}>Edit</.link>
+    </:action>
+    <:action :let={job_config}>
+      <.link
+        href={~p"/admin/job_configurations/#{job_config}/run_now"}
+        method="post"
+        data-confirm="Are you sure you want to run this job now?"
+      >
+        Run Now
+      </.link>
+    </:action>
+    <:action :let={job_config}>
+      <.link
+        href={~p"/admin/job_configurations/#{job_config}"}
+        method="delete"
+        data-confirm="Are you sure you want to delete this job configuration?"
+      >
+        Delete
+      </.link>
+    </:action>
+  </.table>
+</.admin_layout>

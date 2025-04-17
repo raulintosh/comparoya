@@ -506,9 +506,23 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   defp find_user_id_by_email(xml) do
     recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s)
 
-    case Comparoya.Invoices.find_user_by_email(recipient_email) do
-      nil -> nil
-      user -> user.id
+    # Log the extracted email for debugging
+    Logger.debug("Extracted recipient email from XML: #{inspect(recipient_email)}")
+
+    # Ensure email is properly processed before lookup
+    # The find_user_by_email function already does case-insensitive comparison,
+    # but we'll normalize the email here for clarity and additional safety
+    normalized_email =
+      if is_binary(recipient_email), do: String.trim(recipient_email), else: recipient_email
+
+    case Comparoya.Invoices.find_user_by_email(normalized_email) do
+      nil ->
+        Logger.debug("No user found for email: #{inspect(normalized_email)}")
+        nil
+
+      user ->
+        Logger.debug("Found user with ID: #{user.id} for email: #{inspect(normalized_email)}")
+        user.id
     end
   end
 

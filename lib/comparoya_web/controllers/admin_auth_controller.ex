@@ -60,4 +60,54 @@ defmodule ComparoyaWeb.AdminAuthController do
         render(conn, :register_form, changeset: changeset)
     end
   end
+
+  def change_password_form(conn, _params) do
+    render(conn, :change_password_form, error_message: nil)
+  end
+
+  def change_password(conn, %{
+        "user" => %{
+          "current_password" => current_password,
+          "new_password" => new_password,
+          "confirm_password" => confirm_password
+        }
+      }) do
+    user = conn.assigns.current_admin
+
+    cond do
+      new_password != confirm_password ->
+        conn
+        |> put_flash(:error, "New password and confirmation do not match")
+        |> render(:change_password_form,
+          error_message: "New password and confirmation do not match"
+        )
+
+      String.length(new_password) < 6 ->
+        conn
+        |> put_flash(:error, "Password must be at least 6 characters long")
+        |> render(:change_password_form,
+          error_message: "Password must be at least 6 characters long"
+        )
+
+      true ->
+        case Accounts.change_user_password(user, current_password, new_password) do
+          {:ok, _user} ->
+            conn
+            |> put_flash(:info, "Password changed successfully")
+            |> redirect(to: ~p"/dashboard")
+
+          {:error, :invalid_current_password} ->
+            conn
+            |> put_flash(:error, "Current password is incorrect")
+            |> render(:change_password_form, error_message: "Current password is incorrect")
+
+          {:error, changeset} ->
+            conn
+            |> put_flash(:error, "Failed to change password")
+            |> render(:change_password_form,
+              error_message: "Failed to change password: #{inspect(changeset.errors)}"
+            )
+        end
+    end
+  end
 end

@@ -1,6 +1,8 @@
 defmodule ComparoyaWeb.AdminGeocodingHTML do
   use ComparoyaWeb, :html
 
+  import ComparoyaWeb.AdminLayout
+
   embed_templates "admin_geocoding_html/*"
 
   @doc """
