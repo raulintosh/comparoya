@@ -32,7 +32,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
 
     with {:ok, access_token} <- ensure_valid_token(user),
          {:ok, messages} <- API.list_messages(access_token, q: query, maxResults: max_results) do
-      results = process_messages(messages, access_token, callback)
+      results = process_messages(messages, access_token, callback, user)
       {:ok, results}
     else
       {:error, reason} -> {:error, reason}
@@ -47,19 +47,20 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   * `message_id` - The ID of the message to process
   * `access_token` - The access token for the Gmail API
   * `callback` - Function to call with the parsed XML (default: nil)
+  * `user` - The user who is processing the attachment (default: nil)
 
   ## Returns
 
   * `{:ok, results}` - Where results is a list of processed attachments
   * `{:error, reason}` - If an error occurs
   """
-  def process_message(message_id, access_token, callback \\ nil) do
+  def process_message(message_id, access_token, callback \\ nil, user \\ nil) do
     with {:ok, message} <- API.get_message(access_token, message_id, format: "full") do
       attachments = extract_xml_attachments(message)
 
       results =
         Enum.map(attachments, fn attachment ->
-          process_attachment(message_id, attachment, access_token, callback)
+          process_attachment(message_id, attachment, access_token, callback, user)
         end)
 
       {:ok, results}
@@ -212,16 +213,16 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     end
   end
 
-  defp process_messages(%{"messages" => messages}, access_token, callback) do
+  defp process_messages(%{"messages" => messages}, access_token, callback, user \\ nil) do
     Enum.flat_map(messages, fn %{"id" => message_id} ->
-      case process_message(message_id, access_token, callback) do
+      case process_message(message_id, access_token, callback, user) do
         {:ok, results} -> results
         {:error, _} -> []
       end
     end)
   end
 
-  defp process_messages(_, _, _), do: []
+  defp process_messages(_, _, _, _), do: []
 
   defp extract_xml_attachments(message) do
     parts = get_in(message, ["payload", "parts"]) || []
@@ -230,15 +231,23 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
       filename = get_in(part, ["filename"]) || ""
       mime_type = get_in(part, ["mimeType"]) || ""
 
-      String.ends_with?(filename, ".xml") ||
-        mime_type == "application/xml" ||
-        mime_type == "text/xml"
+      # Always include files with .xml extension or XML MIME types
+      is_xml =
+        String.ends_with?(filename, ".xml") ||
+          mime_type == "application/xml" ||
+          mime_type == "text/xml"
+
+      # For .txt files, we'll check the content in process_attachment
+      is_txt = String.ends_with?(filename, ".txt")
+
+      is_xml || is_txt
     end)
   end
 
-  defp process_attachment(message_id, attachment, access_token, callback) do
+  defp process_attachment(message_id, attachment, access_token, callback, user \\ nil) do
     attachment_id = get_in(attachment, ["body", "attachmentId"])
-    filename = get_in(attachment, ["filename"])
+    filename = get_in(attachment, ["filename"]) || ""
+    mime_type = get_in(attachment, ["mimeType"]) || ""
 
     result = %{
       message_id: message_id,
@@ -286,21 +295,45 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
               end
 
             if decoded_data do
-              # Upload the attachment to DigitalOcean Spaces
-              upload_result = upload_to_spaces(decoded_data, filename)
+              # For .txt files, check if content is XML
+              is_txt_file = String.ends_with?(filename, ".txt")
 
-              case upload_result do
-                {:ok, storage_key} ->
-                  # Parse the XML data
-                  parsed_xml = parse_xml(decoded_data)
+              is_xml_content =
+                if is_txt_file do
+                  # Simple check if content starts with XML declaration or has XML-like structure
+                  content_start = String.slice(decoded_data, 0, 1000)
 
-                  if callback, do: callback.(parsed_xml, filename, message_id, storage_key)
+                  String.contains?(content_start, "<?xml") ||
+                    String.contains?(content_start, "<DE>") ||
+                    String.contains?(content_start, "<rDE>") ||
+                    String.match?(content_start, ~r/<[a-zA-Z][a-zA-Z0-9]*>/)
+                else
+                  # Not a .txt file, so we don't need to check content
+                  true
+                end
 
-                  %{result | processed: true, data: parsed_xml, storage_key: storage_key}
+              # Only proceed if it's not a .txt file or if it's a .txt file with XML content
+              if !is_txt_file || (is_txt_file && is_xml_content) do
+                # Upload the attachment to DigitalOcean Spaces
+                upload_result = upload_to_spaces(decoded_data, filename)
 
-                {:error, upload_error} ->
-                  Logger.error("Error uploading attachment: #{upload_error}")
-                  %{result | error: "Error uploading attachment: #{upload_error}"}
+                case upload_result do
+                  {:ok, storage_key} ->
+                    # Parse the XML data
+                    parsed_xml = parse_xml(decoded_data, user)
+
+                    if callback, do: callback.(parsed_xml, filename, message_id, storage_key)
+
+                    %{result | processed: true, data: parsed_xml, storage_key: storage_key}
+
+                  {:error, upload_error} ->
+                    Logger.error("Error uploading attachment: #{upload_error}")
+                    %{result | error: "Error uploading attachment: #{upload_error}"}
+                end
+              else
+                # Skip processing for .txt files that don't contain XML content
+                Logger.info("Skipping .txt file that doesn't contain XML content: #{filename}")
+                %{result | error: "Not an XML file"}
               end
             else
               %{result | error: "Error decoding Base64 data"}
@@ -320,7 +353,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     end
   end
 
-  defp parse_xml(xml_data) do
+  defp parse_xml(xml_data, user \\ nil) do
     try do
       # Parse the XML invoice data with better error handling
       parsed_xml =
@@ -339,7 +372,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
         end
 
       # Extract invoice data
-      invoice_data = extract_invoice_data(parsed_xml)
+      invoice_data = extract_invoice_data(parsed_xml, user)
 
       # Extract business entity data
       business_entity = extract_business_entity(parsed_xml)
@@ -351,7 +384,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
       metadata = extract_invoice_metadata(parsed_xml)
 
       # Find user by email
-      user_id = find_user_id_by_email(parsed_xml)
+      user_id = find_user_id_by_email(parsed_xml, user)
 
       # Return structured data
       %{
@@ -382,7 +415,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   end
 
   # Extract invoice data from XML
-  defp extract_invoice_data(xml) do
+  defp extract_invoice_data(xml, user) do
     # Get invoice identification
     invoice_number =
       "#{xpath(xml, ~x"//gTimb/dEst/text()"s)}-#{xpath(xml, ~x"//gTimb/dPunExp/text()"s)}-#{xpath(xml, ~x"//gTimb/dNumDoc/text()"s)}"
@@ -404,7 +437,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     # Get recipient information
     recipient_ruc = xpath(xml, ~x"//gDatGralOpe/gDatRec/dRucRec/text()"s)
     recipient_name = xpath(xml, ~x"//gDatGralOpe/gDatRec/dNomRec/text()"s)
-    recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s)
+    recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s) || user.email
 
     # Get totals
     total_amount = parse_decimal(xpath(xml, ~x"//gTotSub/dTotGralOpe/text()"s))
@@ -503,25 +536,34 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
   end
 
   # Find user ID by email from XML
-  defp find_user_id_by_email(xml) do
+  defp find_user_id_by_email(xml, user) do
     recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s)
 
     # Log the extracted email for debugging
     Logger.debug("Extracted recipient email from XML: #{inspect(recipient_email)}")
 
-    # Ensure email is properly processed before lookup
-    # The find_user_by_email function already does case-insensitive comparison,
-    # but we'll normalize the email here for clarity and additional safety
-    normalized_email =
-      if is_binary(recipient_email), do: String.trim(recipient_email), else: recipient_email
+    # Check if recipient_email is empty or nil
+    email_to_use =
+      if is_binary(recipient_email) && String.trim(recipient_email) != "" do
+        # Use recipient_email if it's not empty
+        String.trim(recipient_email)
+      else
+        # If recipient_email is empty or nil, use the user's email if available
+        if user && is_binary(user.email) do
+          Logger.debug("Using user's email instead: #{user.email}")
+          user.email
+        else
+          nil
+        end
+      end
 
-    case Comparoya.Invoices.find_user_by_email(normalized_email) do
+    case Comparoya.Invoices.find_user_by_email(email_to_use) do
       nil ->
-        Logger.debug("No user found for email: #{inspect(normalized_email)}")
+        Logger.debug("No user found for email: #{inspect(email_to_use)}")
         nil
 
       user ->
-        Logger.debug("Found user with ID: #{user.id} for email: #{inspect(normalized_email)}")
+        Logger.debug("Found user with ID: #{user.id} for email: #{inspect(email_to_use)}")
         user.id
     end
   end

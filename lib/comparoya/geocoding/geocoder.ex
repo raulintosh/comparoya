@@ -6,13 +6,13 @@ defmodule Comparoya.Geocoding.Geocoder do
   require Logger
 
   @doc """
-  Geocodes an address using Google Maps API.
+  Geocodes an address using Google Maps API.e
 
   Returns `{:ok, %{latitude: float, longitude: float}}` on success,
   or `{:error, reason}` on failure.
   """
   def geocode(address) when is_binary(address) and address != "" do
-    api_key = Application.get_env(:comparoya, :google_maps)[:api_key]
+    api_key = System.get_env("GOOGLE_MAPS_API_KEY")
 
     if is_nil(api_key) or api_key == "" or api_key == "your_api_key_here" do
       Logger.error("""
@@ -25,6 +25,7 @@ defmodule Comparoya.Geocoding.Geocoder do
       {:error, :api_key_missing}
     else
       url = build_geocoding_url(address, api_key)
+      IO.inspect(url, label: "Geocoding URL")
 
       case make_request(url) do
         {:ok, body} ->
