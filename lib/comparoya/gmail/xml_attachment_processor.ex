@@ -437,7 +437,20 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     # Get recipient information
     recipient_ruc = xpath(xml, ~x"//gDatGralOpe/gDatRec/dRucRec/text()"s)
     recipient_name = xpath(xml, ~x"//gDatGralOpe/gDatRec/dNomRec/text()"s)
-    recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s) || user.email
+    recipient_email = xpath(xml, ~x"//gDatGralOpe/gDatRec/dEmailRec/text()"s)
+
+    recipient_email =
+      if is_binary(recipient_email) && String.trim(recipient_email) != "" do
+        recipient_email
+      else
+        if user && is_binary(user.email) do
+          Logger.info("XML has no recipient email, using user's email instead: #{user.email}")
+          user.email
+        else
+          Logger.warning("XML has no recipient email and no user email available")
+          ""
+        end
+      end
 
     # Get totals
     total_amount = parse_decimal(xpath(xml, ~x"//gTotSub/dTotGralOpe/text()"s))
