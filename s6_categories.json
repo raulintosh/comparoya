@@ -1,0 +1,155 @@
+{
+  "categories": [
+    {
+      "name": "Almacén",
+      "subcategories": [
+        {
+          "name": "Aderezos/Condimentos",
+          "items": [
+            {"name": "Aceites", "url": "https://www.superseis.com.py/category/3-almacen-aderezoscondimentos-aceites.aspx"},
+            {"name": "Aderezos/Salsas", "url": "https://www.superseis.com.py/category/4-almacen-aderezoscondimentos-aderezos.aspx"},
+            {"name": "Especias", "url": "https://www.superseis.com.py/category/5-almacen-aderezoscondimentos-especias.aspx"},
+            {"name": "Ketchup", "url": "https://www.superseis.com.py/category/6-almacen-aderezoscondimentos-ketchup.aspx"},
+            {"name": "Mayonesa", "url": "https://www.superseis.com.py/category/7-almacen-aderezoscondimentos-mayonesa.aspx"},
+            {"name": "Mostaza", "url": "https://www.superseis.com.py/category/8-almacen-aderezoscondimentos-mostaza.aspx"},
+            {"name": "Sal", "url": "https://www.superseis.com.py/category/10-almacen-aderezoscondimentos-sal.aspx"},
+            {"name": "Salsa de Soja/Picantes", "url": "https://www.superseis.com.py/category/12-almacen-aderezoscondimentos-salsas.aspx"},
+            {"name": "Tempero", "url": "https://www.superseis.com.py/category/14-almacen-aderezoscondimentos-tempero.aspx"},
+            {"name": "Tomatados", "url": "https://www.superseis.com.py/category/884-tomatados.aspx"},
+            {"name": "Vinagres/Otros", "url": "https://www.superseis.com.py/category/15-almacen-aderezoscondimentos-vinagres.aspx"}
+          ]
+        },
+        {
+          "name": "Alimentos Secos",
+          "items": [
+            {"name": "Arroz", "url": "https://www.superseis.com.py/category/19-almacen-alimentos-secos-arroz.aspx"},
+            {"name": "Snacks", "url": "https://www.superseis.com.py/category/26-almacen-alimentos-secos-bocaditos.aspx"},
+            {"name": "Azúcar/Endulzantes", "url": "https://www.superseis.com.py/category/852-azucarendulzantes.aspx"},
+            {"name": "Chocolatadas/Batidos", "url": "https://www.superseis.com.py/category/133-almacen-infusiones-cacao.aspx"},
+            {"name": "Caldos/Sopas/Pure", "url": "https://www.superseis.com.py/category/27-almacen-alimentos-secos-caldos.aspx"},
+            {"name": "Cereales/Semillas", "url": "https://www.superseis.com.py/category/849-cereales-semillas.aspx"},
+            {"name": "Delicatessen", "url": "https://www.superseis.com.py/category/850-delicatessen.aspx"},
+            {"name": "Dulces Sólidos", "url": "https://www.superseis.com.py/category/860-dulces-solidos.aspx"},
+            {"name": "Dulces/Mermeladas/Miel", "url": "https://www.superseis.com.py/category/863-dulcesmermeladasmiel.aspx"},
+            {"name": "Fideo/Lasaña/Pasta", "url": "https://www.superseis.com.py/category/856-fideolasanapasta.aspx"},
+            {"name": "Galletitas Dulces/Saladas", "url": "https://www.superseis.com.py/category/851-galletitas-dulcessaladas.aspx"},
+            {"name": "Harinas/Almidón", "url": "https://www.superseis.com.py/category/960-harinasalmidon.aspx"},
+            {"name": "Legumbres secas", "url": "https://www.superseis.com.py/category/853-legumbres-secas.aspx"},
+            {"name": "Leche en Polvo/varios", "url": "https://www.superseis.com.py/category/854-leche-en-polvovarios.aspx"},
+            {"name": "Postres en Polvo", "url": "https://www.superseis.com.py/category/864-postres-en-polvo.aspx"},
+            {"name": "Repostería/Pasteleria", "url": "https://www.superseis.com.py/category/857-reposteria-pasteleria.aspx"}
+          ]
+        },
+        {
+          "name": "Nutriseis",
+          "items": [
+            {"name": "Cereales/Semillas", "url": "https://www.superseis.com.py/category/1255-almacen-nutriseis-cerealessemillas.aspx"},
+            {"name": "Dulces/Mermeladas", "url": "https://www.superseis.com.py/category/1256-almacen-nutriseis-dulcesmermeladas.aspx"},
+            {"name": "Azúcar/Endulzantes", "url": "https://www.superseis.com.py/category/1257-almacen-nutriseis-azucarendulzantes.aspx"},
+            {"name": "Galletitas Dulces/Saladas", "url": "https://www.superseis.com.py/category/1258-galletitas-dulcessaladas.aspx"},
+            {"name": "Harina/Soja/Sopas", "url": "https://www.superseis.com.py/category/1259-harinasojasopas.aspx"},
+            {"name": "Leche/Café/Chocolate", "url": "https://www.superseis.com.py/category/1260-lechecafechocolate.aspx"},
+            {"name": "Postres/Dulces", "url": "https://www.superseis.com.py/category/1261-postresdulces.aspx"},
+            {"name": "Frutos Secos", "url": "https://www.superseis.com.py/category/1262-frutos-secos.aspx"},
+            {"name": "Snacks", "url": "https://www.superseis.com.py/category/1263-snacks.aspx"},
+            {"name": "Bebidas Dietéticas", "url": "https://www.superseis.com.py/category/1264-bebidas-dieteticas.aspx"},
+            {"name": "Yogurt/Quesos", "url": "https://www.superseis.com.py/category/1265-yogurtquesos.aspx"},
+            {"name": "Golosinas", "url": "https://www.superseis.com.py/category/1266-golosinas.aspx"},
+            {"name": "Aderezos/Condimentos/Salsas", "url": "https://www.superseis.com.py/category/1267-aderezoscondimentossalsas.aspx"},
+            {"name": "Panificado Integral", "url": "https://www.superseis.com.py/category/1268-panificado-integral.aspx"},
+            {"name": "Fideo/Arroz", "url": "https://www.superseis.com.py/category/1269-fideoarroz.aspx"},
+            {"name": "Enlatados", "url": "https://www.superseis.com.py/category/1270-enlatados.aspx"},
+            {"name": "Yerba/Té", "url": "https://www.superseis.com.py/category/1271-yerbate.aspx"}
+          ]
+        },
+        {
+          "name": "Enlatados",
+          "items": [
+            {"name": "Aceitunas/Champignon", "url": "https://www.superseis.com.py/category/870-aceitunaschampignon.aspx"},
+            {"name": "Frutas Enlatadas", "url": "https://www.superseis.com.py/category/880-frutas-enlatadas.aspx"},
+            {"name": "Verduras Enlatadas", "url": "https://www.superseis.com.py/category/881-verduras-enlatadas.aspx"},
+            {"name": "Paté/Picadillo/Conservas", "url": "https://www.superseis.com.py/category/874-patepicadilloconservas.aspx"},
+            {"name": "Atún/Mariscos/Sardinas", "url": "https://www.superseis.com.py/category/882-atunmariscossardinas.aspx"}
+          ]
+        },
+        {
+          "name": "Golosinas",
+          "items": [
+            {"name": "Alfajores", "url": "https://www.superseis.com.py/category/967-alfajores.aspx"},
+            {"name": "Caramelos/Chicles", "url": "https://www.superseis.com.py/category/972-carameloschicles.aspx"},
+            {"name": "Chocolates", "url": "https://www.superseis.com.py/category/968-chocolates.aspx"},
+            {"name": "Turrones", "url": "https://www.superseis.com.py/category/971-turrones.aspx"}
+          ]
+        },
+        {
+          "name": "Café/Té/Yerba",
+          "items": [
+            {"name": "Café", "url": "https://www.superseis.com.py/category/888-cafe.aspx"},
+            {"name": "Té", "url": "https://www.superseis.com.py/category/889-te.aspx"},
+            {"name": "Yerba", "url": "https://www.superseis.com.py/category/890-yerba.aspx"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bazar",
+      "subcategories": [
+        {
+          "name": "Aire Libre",
+          "items": [
+            {"name": "Camping", "url": "https://www.superseis.com.py/category/528-no-tradicionales-aire-libre-camping.aspx"},
+            {"name": "Conservadora/Champañera", "url": "https://www.superseis.com.py/category/530-no-tradicionales-aire-libre-conservadoras.aspx"},
+            {"name": "Terere/Mate", "url": "https://www.superseis.com.py/category/531-no-tradicionales-aire-libre-tereremate.aspx"}
+          ]
+        },
+        {
+          "name": "Cocina",
+          "items": [
+            {"name": "Acces. Madera", "url": "https://www.superseis.com.py/category/151-bazar-cocina-accs-madera-pcocina.aspx"},
+            {"name": "Acces. Acero Inox.", "url": "https://www.superseis.com.py/category/146-bazar-cocina-acces-acero-inox-pcocina.aspx"},
+            {"name": "Acces. Aluminio", "url": "https://www.superseis.com.py/category/147-bazar-cocina-acces-aluminio-p-cocina.aspx"},
+            {"name": "Acces. Plásticos", "url": "https://www.superseis.com.py/category/154-bazar-cocina-accs-plasticos-p-cocina.aspx"},
+            {"name": "Acces. Teflón", "url": "https://www.superseis.com.py/category/148-bazar-cocina-acces-teflon-pcocina.aspx"},
+            {"name": "Acces. Vidrios", "url": "https://www.superseis.com.py/category/156-bazar-cocina-accs-vidrios-pcocina.aspx"},
+            {"name": "Cerámica/Porcelana/Loza", "url": "https://www.superseis.com.py/category/157-bazar-cocina-ceramicaporcelanaloza.aspx"},
+            {"name": "Cubiertos", "url": "https://www.superseis.com.py/category/158-bazar-cocina-cubiertos.aspx"},
+            {"name": "Utensilios", "url": "https://www.superseis.com.py/category/162-bazar-cocina-utensilios.aspx"}
+          ]
+        },
+        {
+          "name": "Cotillón",
+          "items": [
+            {"name": "Decoración", "url": "https://www.superseis.com.py/category/546-no-tradicionales-cotillon-cotillon-decoracion.aspx"},
+            {"name": "Servicio de Mesa", "url": "https://www.superseis.com.py/category/549-no-tradicionales-cotillon-servicio-de-mesa.aspx"},
+            {"name": "Vajillas Descartables", "url": "https://www.superseis.com.py/category/550-no-tradicionales-cotillon-vajillas-descartables.aspx"},
+            {"name": "Varios", "url": "https://www.superseis.com.py/category/548-no-tradicionales-cotillon-cuidado-y-manejo-de-alimentos.aspx"}
+          ]
+        },
+        {
+          "name": "Decoración/Regalos",
+          "items": [
+            {"name": "Decoración Hogar", "url": "https://www.superseis.com.py/category/975-decoracion-hogar.aspx"},
+            {"name": "Otros Decoración", "url": "https://www.superseis.com.py/category/180-bazar-decoracionregalos-otros-arts-de-decoracion.aspx"}
+          ]
+        },
+        {
+          "name": "Organizadores del Hogar",
+          "items": [
+            {"name": "Accesorios de Limpieza", "url": "https://www.superseis.com.py/category/909-accesorios-de-limpieza.aspx"},
+            {"name": "Lavado/Planchado", "url": "https://www.superseis.com.py/category/980-lavadoplanchado.aspx"},
+            {"name": "Organizadores", "url": "https://www.superseis.com.py/category/981-organizadores.aspx"}
+          ]
+        },
+        {
+          "name": "Vajillas",
+          "items": [
+            {"name": "Madera", "url": "https://www.superseis.com.py/category/159-bazar-cocina-madera.aspx"},
+            {"name": "Vidrio", "url": "https://www.superseis.com.py/category/163-bazar-cocina-vidrio.aspx"},
+            {"name": "Metal/Aluminio", "url": "https://www.superseis.com.py/category/160-bazar-cocina-metalaluminio.aspx"},
+            {"name": "Plástico/Melamina", "url": "https://www.superseis.com.py/category/161-bazar-cocina-plasticosmelaminas.aspx"}
+          ]
+        }
+      ]
+    }
+  ]
+}
