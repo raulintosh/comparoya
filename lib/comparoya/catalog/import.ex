@@ -6,6 +6,97 @@ defmodule Comparoya.Catalog.Import do
   alias Comparoya.Repo
   alias Comparoya.Catalog.Category
   alias Comparoya.Catalog.Subcategory
+  alias Comparoya.Invoices.BusinessEntity
+
+  @doc """
+  Imports categories and subcategories from the Arete catalog JSON file.
+  Sets the business_entity_id from the ID of the business entity "CAFSA S.A.".
+  """
+  def import_arete_catalog(file_path \\ "catalogo_arete.json") do
+    # First, find the business entity "CAFSA S.A."
+    business_entity = Repo.get_by(BusinessEntity, name: "CAFSA S.A.")
+
+    unless business_entity do
+      {:error, "Business entity 'CAFSA S.A.' not found"}
+    else
+      import_arete_catalog_with_entity(file_path, business_entity.id)
+    end
+  end
+
+  @doc """
+  Imports categories and subcategories from the Arete catalog JSON file with the given business_entity_id.
+  """
+  defp import_arete_catalog_with_entity(file_path, business_entity_id) do
+    with {:ok, content} <- File.read(file_path),
+         {:ok, data} <- Jason.decode(content) do
+      # First, let's create a migration to fix the foreign key constraint
+      IO.puts("Fixing database constraints...")
+      fix_foreign_key_constraint()
+
+      result =
+        Repo.transaction(fn ->
+          # Process each department and its categories
+          Enum.each(data, fn department_data ->
+            department_name = department_data["department"]
+
+            # Process each category in the department
+            Enum.each(department_data["categories"], fn category_data ->
+              category_name = category_data["name"]
+              full_category_name = "#{department_name} - #{category_name}"
+
+              # Create or update the category
+              category =
+                case Repo.get_by(Category, description: full_category_name) do
+                  nil ->
+                    %Category{
+                      description: full_category_name,
+                      business_entities_id: business_entity_id
+                    }
+                    |> Repo.insert!()
+
+                  existing ->
+                    existing
+                    |> Category.changeset(%{business_entities_id: business_entity_id})
+                    |> Repo.update!()
+                end
+
+              # Process each subcategory in the category
+              Enum.each(category_data["subcategories"], fn subcategory_data ->
+                subcategory_name = subcategory_data["name"]
+                subcategory_url = subcategory_data["url"]
+
+                # Create or update the subcategory
+                case Repo.get_by(Subcategory,
+                       category_id: category.id,
+                       description: subcategory_name
+                     ) do
+                  nil ->
+                    %Subcategory{
+                      category_id: category.id,
+                      description: subcategory_name,
+                      path: subcategory_url
+                    }
+                    |> Repo.insert!()
+
+                  existing ->
+                    existing
+                    |> Subcategory.changeset(%{path: subcategory_url})
+                    |> Repo.update!()
+                end
+              end)
+            end)
+          end)
+        end)
+
+      case result do
+        {:ok, _} -> {:ok, :imported}
+        error -> error
+      end
+    else
+      {:error, reason} -> {:error, reason}
+      error -> {:error, error}
+    end
+  end
 
   @doc """
   Imports categories and subcategories from the SuperSeis catalog JSON file.

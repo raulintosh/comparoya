@@ -1,0 +1,158 @@
+[
+  {
+    "department": "Electrónica",
+    "categories": [
+      {
+        "name": "Televisores",
+        "subcategories": [
+          {
+            "name": "Smart TV",
+            "url": "https://www.arete.com.py/category/smart-tv"
+          },
+          {
+            "name": "LED TV",
+            "url": "https://www.arete.com.py/category/led-tv"
+          },
+          {
+            "name": "OLED TV",
+            "url": "https://www.arete.com.py/category/oled-tv"
+          }
+        ]
+      },
+      {
+        "name": "Audio",
+        "subcategories": [
+          {
+            "name": "Parlantes",
+            "url": "https://www.arete.com.py/category/parlantes"
+          },
+          {
+            "name": "Auriculares",
+            "url": "https://www.arete.com.py/category/auriculares"
+          },
+          {
+            "name": "Sistemas de Sonido",
+            "url": "https://www.arete.com.py/category/sistemas-sonido"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "department": "Informática",
+    "categories": [
+      {
+        "name": "Computadoras",
+        "subcategories": [
+          {
+            "name": "Laptops",
+            "url": "https://www.arete.com.py/category/laptops"
+          },
+          {
+            "name": "Desktops",
+            "url": "https://www.arete.com.py/category/desktops"
+          },
+          {
+            "name": "All-in-One",
+            "url": "https://www.arete.com.py/category/all-in-one"
+          }
+        ]
+      },
+      {
+        "name": "Accesorios",
+        "subcategories": [
+          {
+            "name": "Teclados",
+            "url": "https://www.arete.com.py/category/teclados"
+          },
+          {
+            "name": "Mouse",
+            "url": "https://www.arete.com.py/category/mouse"
+          },
+          {
+            "name": "Monitores",
+            "url": "https://www.arete.com.py/category/monitores"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "department": "Electrodomésticos",
+    "categories": [
+      {
+        "name": "Línea Blanca",
+        "subcategories": [
+          {
+            "name": "Refrigeradores",
+            "url": "https://www.arete.com.py/category/refrigeradores"
+          },
+          {
+            "name": "Lavadoras",
+            "url": "https://www.arete.com.py/category/lavadoras"
+          },
+          {
+            "name": "Secadoras",
+            "url": "https://www.arete.com.py/category/secadoras"
+          }
+        ]
+      },
+      {
+        "name": "Pequeños Electrodomésticos",
+        "subcategories": [
+          {
+            "name": "Licuadoras",
+            "url": "https://www.arete.com.py/category/licuadoras"
+          },
+          {
+            "name": "Cafeteras",
+            "url": "https://www.arete.com.py/category/cafeteras"
+          },
+          {
+            "name": "Planchas",
+            "url": "https://www.arete.com.py/category/planchas"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "department": "Muebles",
+    "categories": [
+      {
+        "name": "Sala",
+        "subcategories": [
+          {
+            "name": "Sofás",
+            "url": "https://www.arete.com.py/category/sofas"
+          },
+          {
+            "name": "Mesas de Centro",
+            "url": "https://www.arete.com.py/category/mesas-centro"
+          },
+          {
+            "name": "Estanterías",
+            "url": "https://www.arete.com.py/category/estanterias"
+          }
+        ]
+      },
+      {
+        "name": "Dormitorio",
+        "subcategories": [
+          {
+            "name": "Camas",
+            "url": "https://www.arete.com.py/category/camas"
+          },
+          {
+            "name": "Armarios",
+            "url": "https://www.arete.com.py/category/armarios"
+          },
+          {
+            "name": "Mesas de Noche",
+            "url": "https://www.arete.com.py/category/mesas-noche"
+          }
+        ]
+      }
+    ]
+  }
+]
