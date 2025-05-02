@@ -64,7 +64,7 @@ defmodule ComparoyaWeb.DashboardController do
         join: be in Comparoya.Invoices.BusinessEntity,
         on: i.business_entity_id == be.id,
         where: i.user_id == ^user_id,
-        where: be.economic_activity_code in ["47111", "56101", "46699"]
+        where: be.economic_activity_code in ["47111", "56101", "46699", "46900"]
 
     # Add search filter if search term is provided
     search_query =
