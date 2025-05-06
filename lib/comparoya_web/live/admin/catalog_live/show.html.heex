@@ -1,0 +1,126 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Category Details</h1>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+          View details and subcategories for this category.
+        </p>
+      </div>
+      <div>
+        <.link
+          navigate={~p"/admin/catalog"}
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <svg
+            class="mr-2 -ml-1 h-5 w-5 text-gray-500"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Back to Catalog
+        </.link>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-200">
+      <dl>
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Category Name</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            {@category.description}
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Business Entity</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            {if @category.business_entity, do: @category.business_entity.name, else: "N/A"}
+          </dd>
+        </div>
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Subcategories Count</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            {length(@category.subcategories)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="px-4 py-5 sm:px-6">
+      <h2 class="text-lg font-medium text-gray-900">Subcategories</h2>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        List of subcategories for this category.
+      </p>
+    </div>
+
+    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+      <%= if Enum.empty?(@category.subcategories) do %>
+        <div class="text-center py-6">
+          <p class="text-sm text-gray-500">No subcategories found for this category.</p>
+        </div>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Subcategory Name
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  URL Path
+                </th>
+                <th scope="col" class="relative px-6 py-3">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <%= for subcategory <- @category.subcategories do %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {subcategory.description}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                    {subcategory.path}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a
+                      href={subcategory.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Visit URL
+                      <svg
+                        class="inline-block ml-1 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -25,7 +25,7 @@ defmodule Comparoya.Geocoding.Geocoder do
       {:error, :api_key_missing}
     else
       url = build_geocoding_url(address, api_key)
-      IO.inspect(url, label: "Geocoding URL")
+      # IO.inspect(url, label: "Geocoding URL")
 
       case make_request(url) do
         {:ok, body} ->

@@ -1,4 +1,7 @@
 <div class="w-full">
+  <%= if assigns[:current_admin] do %>
+    <ComparoyaWeb.AdminNavigation.admin_navbar current_admin={@current_admin} />
+  <% end %>
   <div class="bg-white shadow p-4">
     <h1 class="text-2xl font-bold mb-4">Panel de Control</h1>
 

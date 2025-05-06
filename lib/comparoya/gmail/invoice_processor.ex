@@ -104,7 +104,7 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
             {:ok, result}
 
           {:error, operation, value, _changes} ->
-            Logger.error("Failed to create invoice: #{operation} - #{inspect(value)}")
+            # Logger.error("Failed to create invoice: #{operation} - #{inspect(value)}")
             {:error, "Failed to create invoice: #{operation}"}
         end
 
@@ -124,7 +124,7 @@ defmodule Comparoya.Gmail.InvoiceProcessor do
           end
         else
           # Invoice already exists and has a storage key or no new storage key provided
-          Logger.info("Invoice #{invoice.invoice_number} already exists")
+          # Logger.info("Invoice #{invoice.invoice_number} already exists")
           {:ok, invoice}
         end
     end

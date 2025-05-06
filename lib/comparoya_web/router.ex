@@ -69,6 +69,13 @@ defmodule ComparoyaWeb.Router do
     post "/geocoding/start_batch", AdminGeocodingController, :start_batch
     post "/geocoding/update_coordinates/:id", AdminGeocodingController, :update_coordinates
 
+    # Catalog routes
+    live "/catalog", Admin.CatalogLive, :index
+    live "/catalog/:id", Admin.CatalogLive.Show, :show
+
+    # Scraper routes
+    live "/scraper", Admin.ScraperLive, :index
+
     # Observability routes
     oban_dashboard("/oban")
     live_dashboard "/dashboard", metrics: ComparoyaWeb.Telemetry

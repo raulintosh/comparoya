@@ -25,6 +25,12 @@ defmodule ComparoyaWeb.AdminNavigation do
             >
               Job Configurations
             </.link>
+            <.link href={~p"/admin/catalog"} class="text-gray-600 hover:text-gray-900 font-medium">
+              Catalog
+            </.link>
+            <.link href={~p"/admin/scraper"} class="text-gray-600 hover:text-gray-900 font-medium">
+              Scraper
+            </.link>
             <.link href={~p"/admin/geocoding"} class="text-gray-600 hover:text-gray-900 font-medium">
               Geocoding
             </.link>

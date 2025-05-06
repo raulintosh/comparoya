@@ -18,11 +18,12 @@ if user do
   case Comparoya.Accounts.update_user(user, attrs) do
     {:ok, updated_user} ->
       IO.puts("User updated successfully")
-      IO.inspect(updated_user, label: "Updated user")
+
+    # IO.inspect(updated_user, label: "Updated user")
 
     {:error, changeset} ->
       IO.puts("Error updating user")
-      IO.inspect(changeset.errors, label: "Errors")
+      # IO.inspect(changeset.errors, label: "Errors")
   end
 else
   IO.puts("No users found. Please create a user first.")

@@ -84,7 +84,7 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
         :ok
 
       {:error, reason} ->
-        Logger.error("Error processing historical invoices: #{inspect(reason)}")
+        # Logger.error("Error processing historical invoices: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -124,7 +124,7 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
         :ok
 
       {:error, reason} ->
-        Logger.error("Error processing continuous invoices: #{inspect(reason)}")
+        # Logger.error("Error processing continuous invoices: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -161,7 +161,7 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
         :ok
 
       {:error, reason} ->
-        Logger.error("Error processing Gmail XML attachments: #{inspect(reason)}")
+        # Logger.error("Error processing Gmail XML attachments: #{inspect(reason)}")
         {:error, reason}
     end
   end
@@ -187,12 +187,12 @@ defmodule Comparoya.Workers.GmailXmlAttachmentWorker do
           :ok
 
         {:error, reason} ->
-          Logger.error("Error processing Gmail XML attachments: #{inspect(reason)}")
+          # Logger.error("Error processing Gmail XML attachments: #{inspect(reason)}")
           {:error, reason}
       end
     else
       {:error, reason} ->
-        Logger.error("Error in GmailXmlAttachmentWorker: #{inspect(reason)}")
+        # Logger.error("Error in GmailXmlAttachmentWorker: #{inspect(reason)}")
         {:error, reason}
     end
   end

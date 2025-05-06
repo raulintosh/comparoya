@@ -5,7 +5,9 @@ defmodule ComparoyaWeb.AdminAuthController do
   alias Comparoya.Accounts.User
 
   def login_form(conn, _params) do
-    render(conn, :login_form, error_message: nil)
+    conn
+    |> put_layout(false)
+    |> render(:login_form, error_message: nil)
   end
 
   def login(conn, %{"user" => %{"username" => username, "password" => password}}) do
@@ -20,17 +22,20 @@ defmodule ComparoyaWeb.AdminAuthController do
         else
           conn
           |> put_flash(:error, "You do not have admin privileges.")
+          |> put_layout(false)
           |> render(:login_form, error_message: "You do not have admin privileges.")
         end
 
       {:error, :invalid_username} ->
         conn
         |> put_flash(:error, "Invalid username or password")
+        |> put_layout(false)
         |> render(:login_form, error_message: "Invalid username or password")
 
       {:error, :invalid_password} ->
         conn
         |> put_flash(:error, "Invalid username or password")
+        |> put_layout(false)
         |> render(:login_form, error_message: "Invalid username or password")
     end
   end

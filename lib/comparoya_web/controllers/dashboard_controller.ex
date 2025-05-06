@@ -39,8 +39,8 @@ defmodule ComparoyaWeb.DashboardController do
     # Calculate pagination data
     total_pages = ceil(total_count / per_page)
 
-    render(conn, :index,
-      current_user: user,
+    # Prepare assigns based on whether we have a user or admin
+    assigns = [
       invoice_count: invoice_count,
       products_with_prices: products_with_prices,
       search_term: search_term,
@@ -48,7 +48,17 @@ defmodule ComparoyaWeb.DashboardController do
       total_pages: total_pages,
       sort_by: sort_by,
       sort_order: sort_order
-    )
+    ]
+
+    # Add current_user or current_admin to assigns
+    assigns =
+      if conn.assigns[:current_admin] do
+        [current_user: user, current_admin: conn.assigns[:current_admin]] ++ assigns
+      else
+        [current_user: user] ++ assigns
+      end
+
+    render(conn, :index, assigns)
   end
 
   # Get products with their latest prices from invoices

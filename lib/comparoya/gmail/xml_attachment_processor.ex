@@ -213,7 +213,9 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     end
   end
 
-  defp process_messages(%{"messages" => messages}, access_token, callback, user \\ nil) do
+  defp process_messages(messages, access_token, callback, user \\ nil)
+
+  defp process_messages(%{"messages" => messages}, access_token, callback, user) do
     Enum.flat_map(messages, fn %{"id" => message_id} ->
       case process_message(message_id, access_token, callback, user) do
         {:ok, results} -> results
@@ -340,7 +342,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
             end
           rescue
             e ->
-              Logger.error("Error processing XML attachment: #{inspect(e)}")
+              # Logger.error("Error processing XML attachment: #{inspect(e)}")
               %{result | error: "Error processing XML: #{inspect(e)}"}
           end
 
@@ -427,7 +429,7 @@ defmodule Comparoya.Gmail.XmlAttachmentProcessor do
     emission_date =
       parse_datetime(xpath(xml, ~x"//DE/gDatGralOpe/dFeEmiDE/text()"s))
 
-    IO.inspect(emission_date, label: "Emision DATE")
+    # IO.inspect(emission_date, label: "Emision DATE")
 
     signature_date = parse_datetime(xpath(xml, ~x"//dFecFirma/text()"s))
 

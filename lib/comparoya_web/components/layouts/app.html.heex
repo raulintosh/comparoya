@@ -1,5 +1,9 @@
 <ComparoyaWeb.Navigation.responsive_navbar current_user={@current_user} />
 
+<%= if assigns[:current_admin] do %>
+  <ComparoyaWeb.AdminNavigation.admin_navbar current_admin={@current_admin} />
+<% end %>
+
 <main class="flex-grow py-8">
   <ComparoyaWeb.LayoutComponents.responsive_container>
     <.flash_group flash={@flash} />
